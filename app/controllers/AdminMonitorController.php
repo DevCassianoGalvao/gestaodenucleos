@@ -29,7 +29,9 @@ class AdminMonitorController
             LEFT JOIN chamadas c ON c.professor_id = u.id AND c.nucleo_id = n.id
             WHERE u.perfil = 'professor' $where
             GROUP BY u.id, u.nome, u.email, u.foto, u.status, n.nome, n.municipio
-            ORDER BY ultima_chamada IS NOT NULL, ultima_chamada ASC
+            ORDER BY
+                CASE WHEN MAX(c.data_aula) IS NULL THEN 0 ELSE 1 END ASC,
+                MAX(c.data_aula) ASC
             LIMIT 20 OFFSET $off
         ");
         $stmt->execute($params);
