@@ -49,19 +49,68 @@ function matchRoute(string $pattern, string $uri): array|false
 // ─── Route table ─────────────────────────────────────────────────────────────
 $routes = [
     'GET' => [
-        '/'                          => ['AuthController',     'redirectDashboard'],
-        '/login'                     => ['AuthController',     'showLogin'],
-        '/logout'                    => ['AuthController',     'logout'],
-        '/convite/professor/{token}' => ['ConviteController',  'showProfessor'],
-        '/convite/aluno/{token}'     => ['ConviteController',  'showAluno'],
-        '/admin/dashboard'           => ['AdminController',    'dashboard'],
-        '/professor/dashboard'       => ['ProfessorController','dashboard'],
-        '/aluno/dashboard'           => ['AlunoController',    'dashboard'],
+        // Auth
+        '/'                                     => ['AuthController',            'redirectDashboard'],
+        '/login'                                => ['AuthController',            'showLogin'],
+        '/logout'                               => ['AuthController',            'logout'],
+
+        // Convites públicos
+        '/convite/professor/{token}'            => ['ConviteController',         'showProfessor'],
+        '/convite/aluno/{token}'                => ['ConviteController',         'showAluno'],
+
+        // Admin — dashboard
+        '/admin/dashboard'                      => ['AdminController',           'dashboard'],
+
+        // Admin — projetos
+        '/admin/projetos'                       => ['AdminProjetosController',   'index'],
+        '/admin/projetos/novo'                  => ['AdminProjetosController',   'formNovo'],
+        '/admin/projetos/{id}/editar'           => ['AdminProjetosController',   'formEditar'],
+
+        // Admin — núcleos
+        '/admin/nucleos'                        => ['AdminNucleosController',    'index'],
+        '/admin/nucleos/novo'                   => ['AdminNucleosController',    'formNovo'],
+        '/admin/nucleos/{id}/editar'            => ['AdminNucleosController',    'formEditar'],
+
+        // Admin — professores
+        '/admin/professores'                    => ['AdminProfessoresController','index'],
+        '/admin/professores/convite'            => ['AdminProfessoresController','formConvite'],
+        '/admin/professores/novo'               => ['AdminProfessoresController','formNovo'],
+        '/admin/professores/{id}/editar'        => ['AdminProfessoresController','formEditar'],
+
+        // Admin — monitor + exportação
+        '/admin/monitor'                        => ['AdminMonitorController',    'index'],
+        '/admin/exportacao'                     => ['AdminExportacaoController', 'index'],
+        '/admin/exportacao/download'            => ['AdminExportacaoController', 'download'],
+
+        // Professor
+        '/professor/dashboard'                  => ['ProfessorController',       'dashboard'],
+
+        // Aluno
+        '/aluno/dashboard'                      => ['AlunoController',           'dashboard'],
     ],
     'POST' => [
-        '/login'                         => ['AuthController',    'processLogin'],
-        '/convite/professor/{token}'     => ['ConviteController', 'processProfessor'],
-        '/convite/aluno/{token}'         => ['ConviteController', 'processAluno'],
+        // Auth
+        '/login'                                => ['AuthController',            'processLogin'],
+
+        // Convites públicos
+        '/convite/professor/{token}'            => ['ConviteController',         'processProfessor'],
+        '/convite/aluno/{token}'                => ['ConviteController',         'processAluno'],
+
+        // Admin — projetos
+        '/admin/projetos/novo'                  => ['AdminProjetosController',   'store'],
+        '/admin/projetos/{id}/editar'           => ['AdminProjetosController',   'update'],
+        '/admin/projetos/{id}/inativar'         => ['AdminProjetosController',   'inativar'],
+
+        // Admin — núcleos
+        '/admin/nucleos/novo'                   => ['AdminNucleosController',    'store'],
+        '/admin/nucleos/{id}/editar'            => ['AdminNucleosController',    'update'],
+        '/admin/nucleos/{id}/inativar'          => ['AdminNucleosController',    'inativar'],
+
+        // Admin — professores
+        '/admin/professores/convite'            => ['AdminProfessoresController','gerarConvite'],
+        '/admin/professores/novo'               => ['AdminProfessoresController','store'],
+        '/admin/professores/{id}/editar'        => ['AdminProfessoresController','update'],
+        '/admin/professores/{id}/inativar'      => ['AdminProfessoresController','inativar'],
     ],
 ];
 
