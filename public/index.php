@@ -61,6 +61,11 @@ $routes = [
         // Admin — dashboard
         '/admin/dashboard'                      => ['AdminController',           'dashboard'],
 
+        // Admin — API JSON (dashboard analítico)
+        '/api/dashboard/resumo'                 => ['DashboardController',       'resumo'],
+        '/api/dashboard/destaques'              => ['DashboardController',       'destaques'],
+        '/api/dashboard/ranking'                => ['DashboardController',       'ranking'],
+
         // Admin — projetos
         '/admin/projetos'                       => ['AdminProjetosController',   'index'],
         '/admin/projetos/novo'                  => ['AdminProjetosController',   'formNovo'],

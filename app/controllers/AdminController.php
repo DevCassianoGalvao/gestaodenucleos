@@ -7,6 +7,25 @@ class AdminController
         Auth::requireRole('super_admin');
         $db = Database::getInstance();
 
+        // Apenas opções para os filtros — dados vêm via JS/API
+        $projetos = $db->query(
+            "SELECT id, nome FROM projetos WHERE status='ativo' ORDER BY nome ASC"
+        )->fetchAll();
+
+        $municipios = $db->query(
+            "SELECT DISTINCT n.municipio, n.projeto_id
+             FROM nucleos n WHERE n.status='ativo' ORDER BY n.municipio ASC"
+        )->fetchAll();
+
+        $data = compact('projetos', 'municipios');
+        require_once ROOT_PATH . '/app/views/admin/dashboard.php';
+    }
+
+    // ── Legacy dashboard kept for reference — remove after Phase 8 stable ─────
+    private function _legacyDashboard(): void
+    {
+        $db = Database::getInstance();
+
         // ── Stat cards ────────────────────────────────────────────────────────
         $stats = [
             'total_alunos' => (int) $db->query(
@@ -112,6 +131,5 @@ class AdminController
         $professoresInativos = $stmt->fetchAll();
 
         $data = compact('stats', 'nucleos', 'aniversariantes', 'professoresInativos');
-        require_once ROOT_PATH . '/app/views/admin/dashboard.php';
     }
 }
