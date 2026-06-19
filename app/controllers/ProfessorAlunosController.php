@@ -309,7 +309,23 @@ class ProfessorAlunosController
 
         Security::auditLog('geracao_token', 'convites', $db->lastInsertId());
 
-        $_SESSION['invite_url_aluno'] = APP_URL . '/convite/aluno/' . $raw;
+        $inviteUrl = APP_URL . '/convite/aluno/' . $raw;
+        $_SESSION['invite_url_aluno'] = $inviteUrl;
+
+        // Enviar por e-mail se informado
+        $emailDest = Security::sanitizeEmail($_POST['email_destinatario'] ?? '');
+        $nomeDest  = Security::sanitize($_POST['nome_destinatario'] ?? '');
+        if ($emailDest && filter_var($emailDest, FILTER_VALIDATE_EMAIL)) {
+            $nomeNucleo = $db->prepare(
+                "SELECT n.nome, p.nome AS projeto FROM nucleos n JOIN projetos p ON p.id=n.projeto_id WHERE n.id=? LIMIT 1"
+            );
+            $nomeNucleo->execute([$nucleoId]);
+            $nucleo = $nomeNucleo->fetch();
+            $label  = $nucleo ? $nucleo['projeto'] . ' — ' . $nucleo['nome'] : '';
+            require_once ROOT_PATH . '/app/helpers/Mailer.php';
+            Mailer::inviteAluno($emailDest, $nomeDest ?: 'Aluno(a)', $inviteUrl, $label);
+        }
+
         header('Location: ' . APP_URL . '/professor/alunos/convite');
         exit;
     }

@@ -102,6 +102,14 @@ ob_start();
       </p>
       <form method="POST" action="<?= Security::esc(APP_URL) ?>/professor/alunos/convite">
         <?= Security::csrfField() ?>
+        <div style="margin-bottom:.875rem;padding-top:.25rem">
+          <p style="font-size:.8rem;font-weight:600;color:var(--cinza-texto);margin:0 0 .625rem">Enviar convite por e-mail (opcional)</p>
+          <div class="form-group" style="margin-bottom:.5rem">
+            <input type="text" name="nome_destinatario" class="form-control" placeholder="Nome do aluno" style="margin-bottom:.375rem">
+            <input type="email" name="email_destinatario" class="form-control" placeholder="E-mail do aluno">
+            <div class="form-hint">Se preenchido, o link será enviado por e-mail ao aluno.</div>
+          </div>
+        </div>
         <button type="submit" class="btn btn-primary">
           <i data-lucide="link" style="width:16px;height:16px;stroke-width:2"></i>
           Gerar novo link de convite

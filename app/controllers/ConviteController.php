@@ -89,7 +89,7 @@ class ConviteController
         $db->beginTransaction();
         try {
             $ins = $db->prepare("
-                INSERT INTO usuarios (nome, email, senha, perfil, foto, status, criado_em)
+                INSERT INTO usuarios (nome, email, senha_hash, perfil, foto, status, criado_em)
                 VALUES (?, ?, ?, 'professor', ?, 'ativo', NOW())
             ");
             $ins->execute([$data['nome'], $data['email'], $hash, $foto ?: null]);
@@ -115,6 +115,10 @@ class ConviteController
         }
 
         Security::auditLog('cadastro_convite', 'usuarios', $userId);
+
+        // Notify super_admin
+        require_once ROOT_PATH . '/app/helpers/Mailer.php';
+        Mailer::notifyNewProfessor($data['nome'], $data['email'], $convite['nucleo_nome']);
 
         // Auto-login
         $userRow = $db->prepare("SELECT * FROM usuarios WHERE id = ? LIMIT 1");
@@ -183,7 +187,7 @@ class ConviteController
         $db->beginTransaction();
         try {
             $ins = $db->prepare("
-                INSERT INTO usuarios (nome, email, senha, perfil, foto, status, criado_em)
+                INSERT INTO usuarios (nome, email, senha_hash, perfil, foto, status, criado_em)
                 VALUES (?, ?, ?, 'aluno', ?, 'ativo', NOW())
             ");
             $ins->execute([$data['nome'], $data['email'], $hash, $foto ?: null]);
@@ -220,6 +224,17 @@ class ConviteController
         }
 
         Security::auditLog('cadastro_convite', 'alunos', $userId);
+
+        // Notify professor(es) do núcleo
+        require_once ROOT_PATH . '/app/helpers/Mailer.php';
+        $profStmt = $db->prepare(
+            "SELECT u.nome, u.email FROM nucleo_professores np
+             JOIN usuarios u ON u.id = np.usuario_id
+             WHERE np.nucleo_id = ? AND u.status = 'ativo'"
+        );
+        $profStmt->execute([$convite['nucleo_id']]);
+        $professores = $profStmt->fetchAll();
+        Mailer::notifyNewAluno($data['nome'], $convite['nucleo_nome'], $professores);
 
         // Auto-login
         $userRow = $db->prepare("SELECT * FROM usuarios WHERE id = ? LIMIT 1");

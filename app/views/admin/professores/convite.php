@@ -78,6 +78,23 @@ ob_start();
         <div class="form-hint">O professor será vinculado automaticamente a este núcleo ao se cadastrar.</div>
       </div>
 
+      <hr class="divider">
+
+      <p style="font-size:.8rem;font-weight:600;color:var(--cinza-texto);margin:0 0 .75rem">Envio por e-mail (opcional)</p>
+
+      <div class="form-group">
+        <label class="form-label" for="nome_destinatario">Nome do professor</label>
+        <input type="text" id="nome_destinatario" name="nome_destinatario" class="form-control"
+               placeholder="Ex: João Silva">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email_destinatario">E-mail do professor</label>
+        <input type="email" id="email_destinatario" name="email_destinatario" class="form-control"
+               placeholder="professor@email.com">
+        <div class="form-hint">Se preenchido, o link será enviado automaticamente por e-mail.</div>
+      </div>
+
       <div class="alert alert-info" style="font-size:.8rem">
         <i data-lucide="info" style="width:14px;height:14px;flex-shrink:0"></i>
         <span>Gerar um novo convite para o mesmo núcleo invalida o convite anterior pendente.</span>

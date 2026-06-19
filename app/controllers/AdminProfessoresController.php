@@ -345,6 +345,19 @@ class AdminProfessoresController
         $inviteUrl = APP_URL . '/convite/professor/' . $raw;
         $_SESSION['invite_url'] = $inviteUrl;
 
+        // Enviar convite por e-mail se informado
+        $emailDest = Security::sanitizeEmail($_POST['email_destinatario'] ?? '');
+        $nomeDest  = Security::sanitize($_POST['nome_destinatario'] ?? '');
+        if ($emailDest && filter_var($emailDest, FILTER_VALIDATE_EMAIL)) {
+            $nucleoStmt = $db->prepare("SELECT n.nome, p.nome AS projeto FROM nucleos n JOIN projetos p ON p.id=n.projeto_id WHERE n.id=? LIMIT 1");
+            $nucleoStmt->execute([$nucleoId]);
+            $nucleo = $nucleoStmt->fetch();
+            $nomeNucleo = $nucleo ? $nucleo['projeto'] . ' — ' . $nucleo['nome'] : '';
+            require_once ROOT_PATH . '/app/helpers/Mailer.php';
+            Mailer::inviteProfessor($emailDest, $nomeDest ?: 'Professor(a)', $inviteUrl, $nomeNucleo);
+            $_SESSION['flash_success'] = 'Convite gerado e enviado por e-mail para ' . $emailDest . '.';
+        }
+
         header('Location: ' . APP_URL . '/admin/professores/convite');
         exit;
     }
