@@ -26,13 +26,15 @@ class AdminProfessoresController
         $stmt = $db->prepare("
             SELECT
                 u.id, u.nome, u.email, u.telefone, u.foto, u.status,
-                GROUP_CONCAT(n.nome SEPARATOR ', ') AS nucleos,
+                GROUP_CONCAT(DISTINCT n.nome ORDER BY n.nome SEPARATOR '||') AS nucleos,
                 MAX(c.data_aula) AS ultima_chamada,
-                SUM(CASE WHEN c.data_aula >= DATE_FORMAT(NOW(),'%Y-%m-01') THEN 1 ELSE 0 END) AS chamadas_mes
+                COUNT(DISTINCT CASE
+                    WHEN c.data_aula >= DATE_FORMAT(NOW(),'%Y-%m-01') THEN c.id
+                END) AS chamadas_mes
             FROM usuarios u
             LEFT JOIN nucleo_professores np ON np.usuario_id = u.id
             LEFT JOIN nucleos n ON n.id = np.nucleo_id
-            LEFT JOIN chamadas c ON c.professor_id = u.id
+            LEFT JOIN chamadas c ON c.professor_id = u.id AND c.nucleo_id = n.id
             WHERE u.perfil = 'professor' $where
             GROUP BY u.id, u.nome, u.email, u.telefone, u.foto, u.status
             ORDER BY u.nome ASC

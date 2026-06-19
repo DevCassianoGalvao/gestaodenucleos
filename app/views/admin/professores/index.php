@@ -71,6 +71,7 @@ ob_start();
               ? (int) round((time() - strtotime($prof['ultima_chamada'])) / 86400)
               : null;
             $inativo = $diasSemChamada === null || $diasSemChamada > 14;
+            $nucleos = array_values(array_filter(explode('||', $prof['nucleos'] ?? '')));
           ?>
           <tr>
             <td>
@@ -89,7 +90,19 @@ ob_start();
                 </div>
               </div>
             </td>
-            <td class="text-sm"><?= Security::esc($prof['nucleos'] ?? '—') ?></td>
+            <td>
+              <?php if ($nucleos): ?>
+                <div style="display:flex;flex-wrap:wrap;gap:.375rem;max-width:460px">
+                  <?php foreach ($nucleos as $nucleo): ?>
+                    <span class="badge badge-cinza" style="font-weight:500;white-space:normal;text-align:left">
+                      <?= Security::esc($nucleo) ?>
+                    </span>
+                  <?php endforeach; ?>
+                </div>
+              <?php else: ?>
+                <span class="text-sm text-muted">—</span>
+              <?php endif; ?>
+            </td>
             <td><?= (int) $prof['chamadas_mes'] ?></td>
             <td>
               <?php if ($prof['ultima_chamada']): ?>
