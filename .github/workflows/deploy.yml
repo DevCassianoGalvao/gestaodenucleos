@@ -21,11 +21,13 @@ jobs:
           # A conta FTP deve ter /public_html/gestaodenucleos como diretorio raiz.
           server-dir: ./
           local-dir: ./
+          dangerous-clean-slate: false
           exclude: |
             **/.git*
             **/.git*/**
             **/node_modules/**
-            config/config.php
-            DEMO_ACCESS.md
-            .env*
-            database/demo_seed.sql
+            **/config/config.php
+            **/DEMO_ACCESS.md
+            **/.env
+            **/.env.*
+            **/database/demo_seed.sql
