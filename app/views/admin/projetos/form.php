@@ -61,7 +61,7 @@ ob_start();
 
       <hr class="divider">
 
-      <div style="display:flex;gap:.75rem;justify-content:flex-end">
+      <div class="form-actions justify-end">
         <a href="<?= Security::esc(APP_URL) ?>/admin/projetos" class="btn btn-outline">Cancelar</a>
         <button type="submit" class="btn btn-primary">
           <i data-lucide="<?= $isEdit ? 'save' : 'plus' ?>" style="width:16px;height:16px;stroke-width:2"></i>

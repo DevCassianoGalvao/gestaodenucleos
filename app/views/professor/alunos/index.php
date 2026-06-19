@@ -18,7 +18,7 @@ ob_start();
     <h1 class="page-title">Meus Alunos</h1>
     <p class="page-desc">Total: <?= $total ?> aluno<?= $total !== 1 ? 's' : '' ?></p>
   </div>
-  <div style="display:flex;gap:.625rem;flex-wrap:wrap">
+  <div class="page-actions">
     <a href="<?= Security::esc(APP_URL) ?>/professor/alunos/convite" class="btn btn-outline">
       <i data-lucide="link" style="width:15px;height:15px;stroke-width:2"></i>
       Link de convite
@@ -42,7 +42,7 @@ ob_start();
 <!-- Filters -->
 <div class="card mb-4">
   <div class="card-body" style="padding:.75rem 1.25rem">
-    <form method="GET" action="" class="flex items-center gap-3 flex-wrap">
+    <form method="GET" action="" class="search-form">
       <input type="search" name="q" value="<?= Security::esc($q) ?>"
              placeholder="Buscar por nome, e-mail ou telefone…"
              class="form-control" style="max-width:280px">
@@ -69,7 +69,7 @@ ob_start();
     </div>
   <?php else: ?>
     <div class="table-wrap">
-      <table>
+      <table class="responsive-table">
         <thead>
           <tr>
             <th>Aluno</th>
@@ -92,7 +92,7 @@ ob_start();
             else                    { $barClass = 'vermelho'; }
           ?>
           <tr>
-            <td>
+            <td data-label="Aluno" data-primary>
               <div style="display:flex;align-items:center;gap:.75rem">
                 <?php if ($a['foto']): ?>
                   <img src="<?= Security::esc(APP_URL . '/uploads/' . $a['foto']) ?>"
@@ -111,7 +111,7 @@ ob_start();
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Contato">
               <?php if ($a['telefone']): ?>
                 <div class="text-sm"><?= Security::esc($a['telefone']) ?></div>
               <?php endif; ?>
@@ -119,10 +119,10 @@ ob_start();
                 <div class="text-xs text-muted"><?= Security::esc($a['email']) ?></div>
               <?php endif; ?>
             </td>
-            <td>
+            <td data-label="Nascimento">
               <?= $a['data_nascimento'] ? date('d/m/Y', strtotime($a['data_nascimento'])) : '—' ?>
             </td>
-            <td style="text-align:center">
+            <td data-label="Frequência" style="text-align:center">
               <?php if ($pct !== null): ?>
                 <div style="width:80px;margin:0 auto">
                   <div class="health-bar" style="height:6px">
@@ -134,12 +134,12 @@ ob_start();
                 <span class="text-xs text-muted">—</span>
               <?php endif; ?>
             </td>
-            <td style="text-align:center">
+            <td data-label="Status" style="text-align:center">
               <span class="badge badge-<?= $a['status'] === 'ativo' ? 'verde' : 'cinza' ?>">
                 <?= $a['status'] === 'ativo' ? 'Ativo' : 'Inativo' ?>
               </span>
             </td>
-            <td style="text-align:right">
+            <td data-label="Ações" data-actions style="text-align:right">
               <div style="display:flex;justify-content:flex-end;gap:.375rem">
                 <a href="<?= Security::esc(APP_URL) ?>/professor/alunos/<?= $a['id'] ?>/editar"
                    class="btn btn-outline btn-sm">Editar</a>
@@ -163,7 +163,7 @@ ob_start();
     </div>
 
     <?php if ($totalPages > 1): ?>
-    <div class="pagination">
+    <div class="pagination pagination-links">
       <?php for ($i = 1; $i <= $totalPages; $i++): ?>
         <a href="?page=<?= $i ?>&q=<?= urlencode($q) ?>&status=<?= urlencode($status) ?>"
            class="page-item <?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>

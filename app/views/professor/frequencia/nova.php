@@ -78,7 +78,7 @@ ob_start();
     </div>
   </div>
 
-  <div style="display:flex;gap:.75rem">
+  <div class="form-actions">
     <button type="submit" class="btn btn-primary">
       <i data-lucide="check" style="width:16px;height:16px;stroke-width:2.5"></i>
       Salvar chamada

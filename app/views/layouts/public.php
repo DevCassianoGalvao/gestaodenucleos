@@ -1,3 +1,4 @@
+<?php $assetVersion = (string) filemtime(ROOT_PATH . '/public/assets/css/main.css'); ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<?= Security::esc(APP_URL) ?>/public/assets/css/main.css?v=1.0.0">
+  <link rel="stylesheet" href="<?= Security::esc(APP_URL) ?>/public/assets/css/main.css?v=<?= $assetVersion ?>">
   <style>
     body { background: var(--cinza-claro); min-height: 100vh; display: flex; flex-direction: column; }
     .public-wrapper {

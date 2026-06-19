@@ -25,7 +25,7 @@ ob_start();
 <!-- Search -->
 <div class="card mb-4">
   <div class="card-body" style="padding:.75rem 1.25rem">
-    <form method="GET" action="" class="flex items-center gap-3">
+    <form method="GET" action="" class="search-form">
       <input
         type="search"
         name="q"
@@ -51,7 +51,7 @@ ob_start();
     </div>
   <?php else: ?>
     <div class="table-wrap">
-      <table>
+      <table class="responsive-table">
         <thead>
           <tr>
             <th>Projeto</th>
@@ -64,7 +64,7 @@ ob_start();
         <tbody>
           <?php foreach ($projetos as $p): ?>
           <tr>
-            <td>
+            <td data-label="Projeto" data-primary>
               <div style="display:flex;align-items:center;gap:.75rem">
                 <?php if ($p['logo']): ?>
                   <img
@@ -87,14 +87,14 @@ ob_start();
                 </div>
               </div>
             </td>
-            <td><?= $p['total_nucleos'] ?></td>
-            <td>
+            <td data-label="Núcleos ativos"><?= $p['total_nucleos'] ?></td>
+            <td data-label="Status">
               <span class="badge <?= $p['status'] === 'ativo' ? 'badge-verde' : 'badge-cinza' ?>">
                 <?= $p['status'] === 'ativo' ? 'Ativo' : 'Inativo' ?>
               </span>
             </td>
-            <td class="text-sm text-muted"><?= date('d/m/Y', strtotime($p['criado_em'])) ?></td>
-            <td>
+            <td data-label="Criado em" class="text-sm text-muted"><?= date('d/m/Y', strtotime($p['criado_em'])) ?></td>
+            <td data-label="Ações" data-actions>
               <div style="display:flex;justify-content:flex-end;gap:.5rem">
                 <a href="<?= Security::esc(APP_URL) ?>/admin/projetos/<?= $p['id'] ?>/editar" class="btn btn-outline btn-sm">
                   <i data-lucide="pencil" style="width:14px;height:14px;stroke-width:2"></i>
@@ -121,7 +121,7 @@ ob_start();
 
     <!-- Pagination -->
     <?php if ($totalPages > 1): ?>
-    <div style="padding:.875rem 1.25rem;border-top:1px solid var(--cinza-borda);display:flex;align-items:center;justify-content:space-between">
+    <div class="pagination" style="padding:.875rem 1.25rem;border-top:1px solid var(--cinza-borda)">
       <span class="text-sm text-muted">Página <?= $page ?> de <?= $totalPages ?></span>
       <div style="display:flex;gap:.375rem">
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>

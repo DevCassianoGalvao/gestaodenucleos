@@ -71,7 +71,7 @@ ob_start();
       <?php endif; ?>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+    <div class="grid-2">
       <div class="form-group">
         <label class="form-label" for="data_nascimento">Data de nascimento</label>
         <input type="date" id="data_nascimento" name="data_nascimento" class="form-control"

@@ -13,7 +13,7 @@ ob_start();
   <p class="page-desc">Exporte lista de alunos em formato .xlsx com filtros personalizados</p>
 </div>
 
-<div class="grid" style="grid-template-columns:1fr 360px;gap:1.5rem;align-items:start">
+<div class="responsive-split">
 
   <!-- Filter form -->
   <div class="card">

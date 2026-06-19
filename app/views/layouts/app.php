@@ -1,3 +1,4 @@
+<?php $assetVersion = (string) filemtime(ROOT_PATH . '/public/assets/css/main.css'); ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -7,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<?= Security::esc(APP_URL) ?>/public/assets/css/main.css?v=1.0.0">
+  <link rel="stylesheet" href="<?= Security::esc(APP_URL) ?>/public/assets/css/main.css?v=<?= $assetVersion ?>">
   <?php if (!empty($extraCss)): ?>
     <?php foreach ((array) $extraCss as $css): ?>
       <link rel="stylesheet" href="<?= Security::esc($css) ?>">
@@ -62,7 +63,7 @@
 
 <!-- Lucide icons -->
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script src="<?= Security::esc(APP_URL) ?>/public/assets/js/main.js?v=1.0.0"></script>
+<script src="<?= Security::esc(APP_URL) ?>/public/assets/js/main.js?v=<?= $assetVersion ?>"></script>
 <?php if (!empty($extraJs)): ?>
   <?php foreach ((array) $extraJs as $js): ?>
     <script src="<?= Security::esc($js) ?>"></script>

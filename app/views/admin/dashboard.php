@@ -9,7 +9,7 @@ ob_start();
 ?>
 
 <!-- ── Filter bar ──────────────────────────────────────────────────────────── -->
-<div id="filterBar" style="background:#fff;border:1px solid var(--cinza-borda);border-radius:var(--radius-sm);padding:.875rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+<div id="filterBar" class="filter-bar" style="background:#fff;border:1px solid var(--cinza-borda);border-radius:var(--radius-sm);padding:.875rem 1.25rem;margin-bottom:1.5rem">
 
   <select id="fPeriodo" class="form-control" style="max-width:180px">
     <option value="mes_atual">Mês atual</option>
@@ -69,7 +69,7 @@ ob_start();
 
 <!-- ── Destaques ──────────────────────────────────────────────────────────── -->
 <h2 style="font-size:.95rem;font-weight:700;color:var(--azul-marinho);margin:0 0 1rem">Destaques do período</h2>
-<div class="grid" style="grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem">
+<div class="grid dashboard-highlights">
 
   <!-- Melhores -->
   <div style="display:flex;flex-direction:column;gap:.875rem">
@@ -135,7 +135,7 @@ ob_start();
 
 <div class="card">
   <div class="table-wrap">
-    <table id="rankingTable">
+    <table id="rankingTable" class="responsive-table">
       <thead>
         <tr>
           <th style="width:36px">#</th>
@@ -351,16 +351,16 @@ ob_start();
         varHTML = '<span style="color:' + vc + ';font-weight:600">' + (r.variacao > 0 ? '+' : '') + r.variacao + '%</span>';
       }
       return '<tr>' +
-        '<td style="color:var(--cinza-texto);font-weight:700;font-size:.85rem">' + (i+1) + '</td>' +
-        '<td><div style="font-weight:600">' + esc(r.nome) + '</div>' +
+        '<td data-label="Posição" style="color:var(--cinza-texto);font-weight:700;font-size:.85rem">' + (i+1) + '</td>' +
+        '<td data-label="Núcleo" data-primary><div style="font-weight:600">' + esc(r.nome) + '</div>' +
           '<div style="width:72px;height:4px;background:#E5E7EB;border-radius:2px;margin-top:4px">' +
             '<div style="height:4px;width:' + bw + '%;background:' + sc + ';border-radius:2px"></div></div></td>' +
-        '<td><div class="text-sm">' + esc(r.projeto) + '</div><div class="text-xs text-muted">' + esc(r.municipio) + '</div></td>' +
-        '<td class="text-sm">' + esc(r.professor || '—') + '</td>' +
-        '<td style="text-align:center;font-weight:700">' + (r.total_alunos || 0) + '</td>' +
-        '<td style="text-align:center;font-weight:700;color:' + sc + '">' + freq + '</td>' +
-        '<td style="text-align:center">' + varHTML + '</td>' +
-        '<td style="text-align:center"><span class="saude-dot" style="background:' + sc + '" title="' + esc(sa) + '"></span></td>' +
+        '<td data-label="Projeto / Município"><div class="text-sm">' + esc(r.projeto) + '</div><div class="text-xs text-muted">' + esc(r.municipio) + '</div></td>' +
+        '<td data-label="Professor" class="text-sm">' + esc(r.professor || '—') + '</td>' +
+        '<td data-label="Alunos" style="text-align:center;font-weight:700">' + (r.total_alunos || 0) + '</td>' +
+        '<td data-label="Frequência" style="text-align:center;font-weight:700;color:' + sc + '">' + freq + '</td>' +
+        '<td data-label="Variação" style="text-align:center">' + varHTML + '</td>' +
+        '<td data-label="Saúde" style="text-align:center"><span class="saude-dot" style="background:' + sc + '" title="' + esc(sa) + '"></span> <span class="mobile-table-label">' + esc(sa) + '</span></td>' +
         '</tr>';
     }).join('');
   }

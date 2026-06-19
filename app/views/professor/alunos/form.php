@@ -128,7 +128,7 @@ ob_start();
       </div>
     </div>
 
-    <div style="display:flex;gap:.75rem">
+    <div class="form-actions">
       <button type="submit" class="btn btn-primary">
         <i data-lucide="save" style="width:16px;height:16px;stroke-width:2"></i>
         <?= $isEdit ? 'Salvar alterações' : 'Cadastrar aluno' ?>

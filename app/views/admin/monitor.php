@@ -43,7 +43,7 @@ ob_start();
 <!-- Search -->
 <div class="card mb-4">
   <div class="card-body" style="padding:.75rem 1.25rem">
-    <form method="GET" action="" class="flex items-center gap-3">
+    <form method="GET" action="" class="search-form">
       <input type="search" name="q" value="<?= Security::esc($q) ?>"
              placeholder="Buscar por professor ou núcleo…"
              class="form-control" style="max-width:320px">
@@ -64,7 +64,7 @@ ob_start();
     </div>
   <?php else: ?>
     <div class="table-wrap">
-      <table>
+      <table class="responsive-table">
         <thead>
           <tr>
             <th>Professor</th>
@@ -97,7 +97,7 @@ ob_start();
             }
           ?>
           <tr>
-            <td>
+            <td data-label="Professor" data-primary>
               <div style="display:flex;align-items:center;gap:.75rem">
                 <?php if ($prof['foto']): ?>
                   <img src="<?= Security::esc(APP_URL . '/uploads/' . $prof['foto']) ?>" alt="" width="36" height="36"
@@ -113,17 +113,17 @@ ob_start();
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Núcleo / Município">
               <div class="text-sm"><?= Security::esc($prof['nucleo']) ?></div>
               <div class="text-xs text-muted"><?= Security::esc($prof['municipio']) ?></div>
             </td>
-            <td style="text-align:center">
+            <td data-label="Chamadas este mês" style="text-align:center">
               <span style="font-weight:700;font-size:1.1rem"><?= (int) $prof['chamadas_mes'] ?></span>
             </td>
-            <td>
+            <td data-label="Última chamada">
               <?= $prof['ultima_chamada'] ? date('d/m/Y', strtotime($prof['ultima_chamada'])) : '—' ?>
             </td>
-            <td>
+            <td data-label="Dias sem chamada">
               <?php if ($dias !== null): ?>
                 <span style="font-weight:600;color:<?= $alertClass ? 'var(--' . $alertClass . ')' : 'inherit' ?>">
                   <?= $dias ?>d
@@ -132,7 +132,7 @@ ob_start();
                 —
               <?php endif; ?>
             </td>
-            <td style="text-align:center">
+            <td data-label="Status" style="text-align:center">
               <span class="badge <?= $statusClass ?>"><?= $statusLabel ?></span>
             </td>
           </tr>

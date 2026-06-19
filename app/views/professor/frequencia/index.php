@@ -32,7 +32,7 @@ ob_start();
     </div>
   <?php else: ?>
     <div class="table-wrap">
-      <table>
+      <table class="responsive-table">
         <thead>
           <tr>
             <th>Data da aula</th>
@@ -50,15 +50,15 @@ ob_start();
             else                 $barClass = 'vermelho';
           ?>
           <tr>
-            <td>
+            <td data-label="Data da aula" data-primary>
               <div style="font-weight:600"><?= date('d/m/Y', strtotime($c['data_aula'])) ?></div>
               <div class="text-xs text-muted"><?= Security::esc(date('l', strtotime($c['data_aula']))) ?></div>
             </td>
-            <td style="text-align:center"><?= (int) $c['total_alunos'] ?></td>
-            <td style="text-align:center">
+            <td data-label="Alunos" style="text-align:center"><?= (int) $c['total_alunos'] ?></td>
+            <td data-label="Presentes" style="text-align:center">
               <strong><?= (int) $c['total_presentes'] ?></strong>
             </td>
-            <td>
+            <td data-label="Frequência">
               <div style="width:120px">
                 <div style="display:flex;justify-content:space-between;margin-bottom:4px">
                   <span class="text-xs text-muted"><?= $pct ?>%</span>
@@ -68,7 +68,7 @@ ob_start();
                 </div>
               </div>
             </td>
-            <td style="text-align:right">
+            <td data-label="Ações" data-actions style="text-align:right">
               <a href="<?= Security::esc(APP_URL) ?>/professor/frequencia/<?= $c['id'] ?>"
                  class="btn btn-outline btn-sm">Ver detalhes</a>
             </td>
@@ -79,7 +79,7 @@ ob_start();
     </div>
 
     <?php if ($totalPages > 1): ?>
-    <div class="pagination">
+    <div class="pagination pagination-links">
       <?php for ($i = 1; $i <= $totalPages; $i++): ?>
         <a href="?page=<?= $i ?>" class="page-item <?= $i === $page ? 'active' : '' ?>"><?= $i ?></a>
       <?php endfor; ?>

@@ -16,7 +16,7 @@ ob_start();
     <h1 class="page-title">Professores</h1>
     <p class="page-desc"><?= $total ?> professor<?= $total !== 1 ? 'es' : '' ?> cadastrado<?= $total !== 1 ? 's' : '' ?></p>
   </div>
-  <div style="display:flex;gap:.625rem">
+  <div class="page-actions">
     <a href="<?= Security::esc(APP_URL) ?>/admin/professores/convite" class="btn btn-outline">
       <i data-lucide="link" style="width:16px;height:16px;stroke-width:2"></i>
       Gerar convite
@@ -31,7 +31,7 @@ ob_start();
 <!-- Search -->
 <div class="card mb-4">
   <div class="card-body" style="padding:.75rem 1.25rem">
-    <form method="GET" action="" class="flex items-center gap-3">
+    <form method="GET" action="" class="search-form">
       <input type="search" name="q" value="<?= Security::esc($q) ?>"
              placeholder="Buscar por nome ou e-mail…"
              class="form-control" style="max-width:320px">
@@ -53,7 +53,7 @@ ob_start();
     </div>
   <?php else: ?>
     <div class="table-wrap">
-      <table>
+      <table class="responsive-table">
         <thead>
           <tr>
             <th>Professor</th>
@@ -74,7 +74,7 @@ ob_start();
             $nucleos = array_values(array_filter(explode('||', $prof['nucleos'] ?? '')));
           ?>
           <tr>
-            <td>
+            <td data-label="Professor" data-primary>
               <div style="display:flex;align-items:center;gap:.75rem">
                 <?php if ($prof['foto']): ?>
                   <img src="<?= Security::esc(APP_URL . '/uploads/' . $prof['foto']) ?>" alt="" width="36" height="36"
@@ -90,7 +90,7 @@ ob_start();
                 </div>
               </div>
             </td>
-            <td>
+            <td data-label="Núcleos">
               <?php if ($nucleos): ?>
                 <div style="display:flex;flex-wrap:wrap;gap:.375rem;max-width:460px">
                   <?php foreach ($nucleos as $nucleo): ?>
@@ -103,8 +103,8 @@ ob_start();
                 <span class="text-sm text-muted">—</span>
               <?php endif; ?>
             </td>
-            <td><?= (int) $prof['chamadas_mes'] ?></td>
-            <td>
+            <td data-label="Chamadas este mês"><?= (int) $prof['chamadas_mes'] ?></td>
+            <td data-label="Última chamada">
               <?php if ($prof['ultima_chamada']): ?>
                 <span class="text-sm <?= $inativo ? 'text-muted' : '' ?>">
                   <?= date('d/m/Y', strtotime($prof['ultima_chamada'])) ?>
@@ -116,8 +116,8 @@ ob_start();
                 <span class="badge badge-cinza">Sem chamadas</span>
               <?php endif; ?>
             </td>
-            <td><span class="badge <?= $prof['status'] === 'ativo' ? 'badge-verde' : 'badge-cinza' ?>"><?= $prof['status'] === 'ativo' ? 'Ativo' : 'Inativo' ?></span></td>
-            <td>
+            <td data-label="Status"><span class="badge <?= $prof['status'] === 'ativo' ? 'badge-verde' : 'badge-cinza' ?>"><?= $prof['status'] === 'ativo' ? 'Ativo' : 'Inativo' ?></span></td>
+            <td data-label="Ações" data-actions>
               <div style="display:flex;justify-content:flex-end;gap:.5rem">
                 <a href="<?= Security::esc(APP_URL) ?>/admin/professores/<?= $prof['id'] ?>/editar" class="btn btn-outline btn-sm">
                   <i data-lucide="pencil" style="width:14px;height:14px;stroke-width:2"></i>
@@ -143,7 +143,7 @@ ob_start();
     </div>
 
     <?php if ($totalPages > 1): ?>
-    <div style="padding:.875rem 1.25rem;border-top:1px solid var(--cinza-borda);display:flex;align-items:center;justify-content:space-between">
+    <div class="pagination" style="padding:.875rem 1.25rem;border-top:1px solid var(--cinza-borda)">
       <span class="text-sm text-muted">Página <?= $page ?> de <?= $totalPages ?></span>
       <div style="display:flex;gap:.375rem">
         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
