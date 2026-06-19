@@ -1,0 +1,22 @@
+# Credentials
+config/config.php
+
+# Logs
+logs/*.log
+
+# Uploads (user content — not versioned)
+uploads/*
+!uploads/.htaccess
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PHP
+*.cache

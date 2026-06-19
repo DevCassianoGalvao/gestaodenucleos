@@ -1,0 +1,13 @@
+Options -Indexes
+
+# Block PHP execution in uploads directory
+<FilesMatch "\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block potentially dangerous file types
+<FilesMatch "\.(php|php3|php4|php5|phtml|pl|py|rb|cgi|sh|bash|exe|dll)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
