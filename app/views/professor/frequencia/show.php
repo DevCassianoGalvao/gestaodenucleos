@@ -12,7 +12,7 @@ $pct = $totalAlunos > 0 ? round(($totalPresentes / $totalAlunos) * 100) : 0;
 ob_start();
 ?>
 
-<div class="page-header flex items-center gap-3">
+<div class="page-header back-header">
   <a href="<?= Security::esc(APP_URL) ?>/professor/frequencia" class="btn btn-outline btn-sm">
     <i data-lucide="arrow-left" style="width:14px;height:14px;stroke-width:2"></i>
     Voltar
@@ -24,7 +24,7 @@ ob_start();
 </div>
 
 <!-- Summary bar -->
-<div class="card mb-6" style="max-width:480px">
+<div class="card mb-6 narrow-card-sm">
   <div class="card-body">
     <div style="display:flex;justify-content:space-between;margin-bottom:.5rem">
       <span class="text-sm text-muted">Presença geral</span>
@@ -51,7 +51,7 @@ ob_start();
   <?php else: ?>
     <div style="divide-y:1px solid var(--cinza-borda)">
       <?php foreach ($presencas as $p): ?>
-      <div style="display:flex;align-items:center;gap:1rem;padding:.875rem 1.25rem;border-bottom:1px solid var(--cinza-borda);<?= !$p['presente'] ? 'background:#FFF5F5' : '' ?>">
+      <div class="presence-row <?= !$p['presente'] ? 'is-absent' : '' ?>">
         <?php if ($p['foto']): ?>
           <img src="<?= Security::esc(APP_URL . '/uploads/' . $p['foto']) ?>"
                alt="" width="40" height="40"
@@ -61,14 +61,14 @@ ob_start();
             <?= Security::esc(mb_substr($p['nome'], 0, 1)) ?>
           </div>
         <?php endif; ?>
-        <div style="font-weight:600;font-size:.9rem;flex:1"><?= Security::esc($p['nome']) ?></div>
+        <div class="presence-name"><?= Security::esc($p['nome']) ?></div>
         <?php if ($p['presente']): ?>
-          <span style="display:flex;align-items:center;gap:.375rem;font-size:.8rem;font-weight:600;color:var(--verde-sucesso)">
+          <span class="presence-status is-present">
             <i data-lucide="check-circle" style="width:15px;height:15px;stroke-width:2.5"></i>
             Presente
           </span>
         <?php else: ?>
-          <span style="display:flex;align-items:center;gap:.375rem;font-size:.8rem;font-weight:600;color:var(--vermelho)">
+          <span class="presence-status is-absent">
             <i data-lucide="x-circle" style="width:15px;height:15px;stroke-width:2.5"></i>
             Ausente
           </span>

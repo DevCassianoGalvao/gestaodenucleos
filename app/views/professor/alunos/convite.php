@@ -8,7 +8,7 @@ $inviteUrl    = $inviteUrl    ?? null;
 ob_start();
 ?>
 
-<div class="page-header flex items-center gap-3">
+<div class="page-header back-header">
   <a href="<?= Security::esc(APP_URL) ?>/professor/alunos" class="btn btn-outline btn-sm">
     <i data-lucide="arrow-left" style="width:14px;height:14px;stroke-width:2"></i>
     Voltar
@@ -20,7 +20,7 @@ ob_start();
 </div>
 
 <?php if ($inviteUrl): ?>
-<div class="card mb-6" style="max-width:640px;border:2px solid var(--verde-sucesso)">
+<div class="card mb-6 narrow-card invite-success-card">
   <div class="card-body">
     <div style="display:flex;align-items:center;gap:.625rem;margin-bottom:.875rem">
       <div style="width:36px;height:36px;background:#D1FAE5;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -32,11 +32,11 @@ ob_start();
       </div>
     </div>
 
-    <div style="background:var(--cinza-claro);border:1px solid var(--cinza-borda);border-radius:var(--radius-sm);padding:.75rem 1rem;font-family:monospace;font-size:.8rem;word-break:break-all;margin-bottom:.875rem">
+    <div class="invite-url-box">
       <?= Security::esc($inviteUrl) ?>
     </div>
 
-    <div style="display:flex;gap:.625rem;flex-wrap:wrap">
+    <div class="responsive-actions">
       <button type="button" id="copyBtn" class="btn btn-primary" data-url="<?= Security::esc($inviteUrl) ?>">
         <i data-lucide="copy" style="width:15px;height:15px;stroke-width:2"></i>
         Copiar link
@@ -51,7 +51,7 @@ ob_start();
 </div>
 <?php endif; ?>
 
-<div style="max-width:580px;display:flex;flex-direction:column;gap:1.25rem">
+<div class="stack-card-list">
 
   <!-- Status do link atual -->
   <?php if ($conviteAtivo): ?>

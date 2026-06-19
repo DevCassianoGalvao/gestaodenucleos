@@ -501,6 +501,34 @@ tbody tr:hover { background: var(--cinza-claro); }
 .dashboard-highlights { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 2rem; }
 .filter-bar { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
 .mobile-table-label { display: none; }
+.back-header { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.narrow-card { max-width: 640px; }
+.narrow-card-sm { max-width: 480px; }
+.invite-success-card { border: 2px solid var(--verde-sucesso); }
+.invite-url-box {
+  background: var(--cinza-claro);
+  border: 1px solid var(--cinza-borda);
+  border-radius: var(--radius-sm);
+  color: var(--preto-texto);
+  font-family: monospace;
+  font-size: .8rem;
+  margin-bottom: .875rem;
+  padding: .75rem 1rem;
+  word-break: break-all;
+}
+.stack-card-list { display: flex; flex-direction: column; gap: 1.25rem; max-width: 580px; }
+.presence-row {
+  align-items: center;
+  border-bottom: 1px solid var(--cinza-borda);
+  display: flex;
+  gap: 1rem;
+  padding: .875rem 1.25rem;
+}
+.presence-row.is-absent { background: #FFF5F5; }
+.presence-name { flex: 1; font-size: .9rem; font-weight: 600; min-width: 0; }
+.presence-status { align-items: center; display: flex; font-size: .8rem; font-weight: 600; gap: .375rem; }
+.presence-status.is-present { color: var(--verde-sucesso); }
+.presence-status.is-absent { color: var(--vermelho); }
 
 .page-item {
   align-items: center;
@@ -776,6 +804,11 @@ tbody tr:hover { background: var(--cinza-claro); }
 
   .page-content { padding: 1rem; }
   .top-bar { height: 56px; padding: 0 1rem; }
+  .back-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: .75rem;
+  }
   .page-header.justify-between {
     align-items: stretch;
     flex-direction: column;
@@ -883,6 +916,10 @@ tbody tr:hover { background: var(--cinza-claro); }
   .slot-row { align-items: stretch !important; }
   .slot-row .form-control { max-width: none !important; flex: 1 1 100%; }
   .chamada-item { align-items: flex-start !important; padding: .875rem 1rem !important; }
+  .presence-row { align-items: flex-start; flex-wrap: wrap; padding: .875rem 1rem; }
+  .presence-name { flex: 1 1 calc(100% - 56px); }
+  .presence-status { margin-left: 56px; }
+  .invite-success-card .responsive-actions .btn { flex: 1 1 100%; min-height: 42px; }
 }
 
 @media (min-width: 769px) {
