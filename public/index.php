@@ -82,11 +82,25 @@ $routes = [
         '/admin/exportacao'                     => ['AdminExportacaoController', 'index'],
         '/admin/exportacao/download'            => ['AdminExportacaoController', 'download'],
 
-        // Professor
-        '/professor/dashboard'                  => ['ProfessorController',       'dashboard'],
+        // Professor — dashboard
+        '/professor/dashboard'                  => ['ProfessorController',           'dashboard'],
+
+        // Professor — alunos
+        '/professor/alunos'                     => ['ProfessorAlunosController',     'index'],
+        '/professor/alunos/convite'             => ['ProfessorAlunosController',     'formConvite'],
+        '/professor/alunos/novo'                => ['ProfessorAlunosController',     'formNovo'],
+        '/professor/alunos/{id}/editar'         => ['ProfessorAlunosController',     'formEditar'],
+
+        // Professor — frequência
+        '/professor/frequencia'                 => ['ProfessorFrequenciaController', 'index'],
+        '/professor/frequencia/nova'            => ['ProfessorFrequenciaController', 'formNova'],
+        '/professor/frequencia/{id}'            => ['ProfessorFrequenciaController', 'show'],
+
+        // Professor — horários
+        '/professor/horarios'                   => ['ProfessorHorariosController',   'index'],
 
         // Aluno
-        '/aluno/dashboard'                      => ['AlunoController',           'dashboard'],
+        '/aluno/dashboard'                      => ['AlunoController',               'dashboard'],
     ],
     'POST' => [
         // Auth
@@ -107,10 +121,23 @@ $routes = [
         '/admin/nucleos/{id}/inativar'          => ['AdminNucleosController',    'inativar'],
 
         // Admin — professores
-        '/admin/professores/convite'            => ['AdminProfessoresController','gerarConvite'],
-        '/admin/professores/novo'               => ['AdminProfessoresController','store'],
-        '/admin/professores/{id}/editar'        => ['AdminProfessoresController','update'],
-        '/admin/professores/{id}/inativar'      => ['AdminProfessoresController','inativar'],
+        '/admin/professores/convite'            => ['AdminProfessoresController',    'gerarConvite'],
+        '/admin/professores/novo'               => ['AdminProfessoresController',    'store'],
+        '/admin/professores/{id}/editar'        => ['AdminProfessoresController',    'update'],
+        '/admin/professores/{id}/inativar'      => ['AdminProfessoresController',    'inativar'],
+
+        // Professor — alunos
+        '/professor/alunos/convite'             => ['ProfessorAlunosController',     'gerarConvite'],
+        '/professor/alunos/convite/revogar'     => ['ProfessorAlunosController',     'revogarConvite'],
+        '/professor/alunos/novo'                => ['ProfessorAlunosController',     'store'],
+        '/professor/alunos/{id}/editar'         => ['ProfessorAlunosController',     'update'],
+        '/professor/alunos/{id}/inativar'       => ['ProfessorAlunosController',     'inativar'],
+
+        // Professor — frequência
+        '/professor/frequencia/nova'            => ['ProfessorFrequenciaController', 'store'],
+
+        // Professor — horários
+        '/professor/horarios'                   => ['ProfessorHorariosController',   'save'],
     ],
 ];
 
