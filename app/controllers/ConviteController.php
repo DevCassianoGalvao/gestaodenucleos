@@ -37,7 +37,7 @@ class ConviteController
     {
         // Redirect already-logged users
         if (Auth::check()) {
-            header('Location: ' . APP_URL . Auth::dashboardUrl());
+            header('Location: ' . Auth::dashboardUrl());
             exit;
         }
 
@@ -135,7 +135,7 @@ class ConviteController
     public function showAluno(string $token): void
     {
         if (Auth::check()) {
-            header('Location: ' . APP_URL . Auth::dashboardUrl());
+            header('Location: ' . Auth::dashboardUrl());
             exit;
         }
 

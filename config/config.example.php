@@ -6,7 +6,9 @@ if (!defined('ROOT_PATH')) { http_response_code(403); exit; }
 
 define('APP_ENV',  'development'); // 'production' em produção
 define('APP_NAME', 'Gestão de Núcleos');
-define('APP_URL',  'http://localhost/gestao-nucleos'); // sem barra final
+define('BASE_URL',  'https://cassianogalvao.com.br/gestaodenucleos');
+define('BASE_PATH', '/gestaodenucleos');
+define('APP_URL',   BASE_URL); // alias mantido para compatibilidade interna
 
 define('DB_HOST',    'localhost');
 define('DB_NAME',    'gestao_nucleos');

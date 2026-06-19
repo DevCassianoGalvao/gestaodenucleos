@@ -16,9 +16,6 @@ if ($perfil === 'super_admin') {
         ['label' => 'Monitoramento', 'section' => true],
         ['href' => APP_URL . '/admin/monitor',       'label' => 'Monitor',         'icon' => 'activity',         'key' => 'monitor'],
         ['href' => APP_URL . '/admin/exportacao',    'label' => 'Exportação',      'icon' => 'download',         'key' => 'exportacao'],
-        ['label' => 'Comunicação', 'section' => true],
-        ['href' => APP_URL . '/admin/comunicados',   'label' => 'Comunicados',     'icon' => 'mail',             'key' => 'comunicados'],
-        ['href' => APP_URL . '/admin/materiais',     'label' => 'Materiais',       'icon' => 'file-text',        'key' => 'materiais'],
     ];
 } elseif ($perfil === 'professor') {
     $navItems = [
@@ -28,20 +25,11 @@ if ($perfil === 'super_admin') {
         ['href' => APP_URL . '/professor/alunos',    'label' => 'Alunos',          'icon' => 'users',            'key' => 'alunos'],
         ['href' => APP_URL . '/professor/frequencia','label' => 'Frequência',      'icon' => 'check-square',     'key' => 'frequencia'],
         ['href' => APP_URL . '/professor/horarios',  'label' => 'Horários',        'icon' => 'calendar',         'key' => 'horarios'],
-        ['label' => 'Conteúdo', 'section' => true],
-        ['href' => APP_URL . '/professor/materiais', 'label' => 'Materiais',       'icon' => 'file-text',        'key' => 'materiais'],
-        ['href' => APP_URL . '/professor/forum',     'label' => 'Fórum',           'icon' => 'message-square',   'key' => 'forum'],
     ];
 } elseif ($perfil === 'aluno') {
     $navItems = [
         ['label' => 'Início', 'section' => true],
         ['href' => APP_URL . '/aluno/dashboard',     'label' => 'Dashboard',      'icon' => 'layout-dashboard', 'key' => 'dashboard'],
-        ['label' => 'Núcleo', 'section' => true],
-        ['href' => APP_URL . '/aluno/presencas',     'label' => 'Minhas presenças','icon' => 'check-square',    'key' => 'presencas'],
-        ['href' => APP_URL . '/aluno/materiais',     'label' => 'Materiais',       'icon' => 'file-text',       'key' => 'materiais'],
-        ['href' => APP_URL . '/aluno/forum',         'label' => 'Fórum',           'icon' => 'message-square',  'key' => 'forum'],
-        ['label' => 'Minha conta', 'section' => true],
-        ['href' => APP_URL . '/aluno/perfil',        'label' => 'Perfil',          'icon' => 'user',            'key' => 'perfil'],
     ];
 }
 ?>

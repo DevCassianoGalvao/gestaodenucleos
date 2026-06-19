@@ -48,17 +48,10 @@
             'aluno'       => 'Aluno',
             default       => '',
         };
-        $perfilPath = match (Auth::perfil()) {
-            'super_admin' => '/admin',
-            'professor'   => '/professor',
-            'aluno'       => '/aluno',
-            default       => '',
-        };
         ?>
-        <a href="<?= Security::esc(APP_URL . $perfilPath . '/perfil') ?>" class="user-menu-item" role="menuitem">
-          <i data-lucide="user" style="width:14px;height:14px;stroke-width:2"></i>
-          Meu perfil
-        </a>
+        <div style="padding:.375rem .875rem;color:var(--cinza-texto);font-size:.72rem">
+          <?= Security::esc($perfilLabel) ?>
+        </div>
         <div style="border-top:1px solid var(--cinza-borda);margin:.25rem 0"></div>
         <a href="<?= Security::esc(APP_URL) ?>/logout" class="user-menu-item user-menu-item--danger" role="menuitem">
           <i data-lucide="log-out" style="width:14px;height:14px;stroke-width:2"></i>

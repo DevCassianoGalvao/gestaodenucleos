@@ -1,6 +1,7 @@
 Options -Indexes
 
 RewriteEngine On
+RewriteBase /gestaodenucleos/
 
 # Force HTTPS in production (uncomment when SSL is active)
 # RewriteCond %{HTTPS} off

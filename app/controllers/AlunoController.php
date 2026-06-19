@@ -12,7 +12,6 @@ class AlunoController
         $stmt = $db->prepare("
             SELECT a.*, n.nome AS nucleo, p.nome AS projeto
             FROM alunos a
-            JOIN nucleo_professores np ON np.nucleo_id = a.nucleo_id
             JOIN nucleos n ON n.id = a.nucleo_id
             JOIN projetos p ON p.id = n.projeto_id
             WHERE a.usuario_id = ?

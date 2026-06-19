@@ -16,7 +16,7 @@ $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '/';
 $uri = rtrim($uri, '/') ?: '/';
 
 // Strip app base path (e.g., /gestao-nucleos) when running in a subdirectory
-$appBasePath = rtrim((string) parse_url(APP_URL, PHP_URL_PATH), '/');
+$appBasePath = rtrim(BASE_PATH, '/');
 if ($appBasePath !== '' && str_starts_with($uri, $appBasePath)) {
     $uri = substr($uri, strlen($appBasePath)) ?: '/';
 }

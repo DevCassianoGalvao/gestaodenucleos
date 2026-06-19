@@ -1,12 +1,16 @@
 # Credentials
-config/config.php
+/config/config.php
+.env
+*.env
 
 # Logs
-logs/*.log
+/logs/
 
 # Uploads (user content — not versioned)
-uploads/*
-!uploads/.htaccess
+/uploads/
+
+# Demo access credentials (local only)
+DEMO_ACCESS.md
 
 # OS
 .DS_Store
