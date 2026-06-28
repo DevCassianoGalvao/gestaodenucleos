@@ -18,8 +18,7 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: sftp
-          port: 22
+          protocol: ftps
           # A conta FTP deve ter /public_html/gestaodenucleos como diretorio raiz.
           server-dir: ./
           local-dir: ./
