@@ -1,9 +1,7 @@
 name: Deploy para cPanel via FTP
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
