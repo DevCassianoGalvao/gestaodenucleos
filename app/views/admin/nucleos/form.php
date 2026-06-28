@@ -73,6 +73,31 @@ ob_start();
 
       <hr class="divider">
 
+      <p style="font-size:.875rem;font-weight:700;color:var(--azul-marinho);margin:0 0 .25rem">Localização para check-in</p>
+      <p class="text-sm text-muted" style="margin:0 0 1rem">
+        Coordenadas do local de aula. Professores farão check-in e o sistema verifica se estão dentro de 200 m.
+        <br>Obtenha as coordenadas: Google Maps → clique com botão direito no local → copie "latitude, longitude".
+      </p>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label" for="latitude">Latitude</label>
+          <input type="number" id="latitude" name="latitude" class="form-control"
+                 value="<?= $val('latitude') ?>" step="0.00000001" min="-90" max="90"
+                 placeholder="Ex: -22.9068">
+          <div class="form-hint">Ex: -22.9068 (negativo = Sul)</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="longitude">Longitude</label>
+          <input type="number" id="longitude" name="longitude" class="form-control"
+                 value="<?= $val('longitude') ?>" step="0.00000001" min="-180" max="180"
+                 placeholder="Ex: -43.1729">
+          <div class="form-hint">Ex: -43.1729 (negativo = Oeste)</div>
+        </div>
+      </div>
+
+      <hr class="divider">
+
       <div class="form-actions justify-end">
         <a href="<?= Security::esc(APP_URL) ?>/admin/nucleos" class="btn btn-outline">Cancelar</a>
         <button type="submit" class="btn btn-primary">

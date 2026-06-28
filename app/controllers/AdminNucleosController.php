@@ -92,12 +92,15 @@ class AdminNucleosController
             exit;
         }
 
+        $lat = isset($_POST['latitude'])  && $_POST['latitude']  !== '' ? (float) $_POST['latitude']  : null;
+        $lng = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? (float) $_POST['longitude'] : null;
+
         $db   = Database::getInstance();
         $stmt = $db->prepare(
-            "INSERT INTO nucleos (projeto_id, nome, municipio, estado, status, criado_em)
-             VALUES (?, ?, ?, ?, 'ativo', NOW())"
+            "INSERT INTO nucleos (projeto_id, nome, municipio, estado, latitude, longitude, status, criado_em)
+             VALUES (?, ?, ?, ?, ?, ?, 'ativo', NOW())"
         );
-        $stmt->execute([$projetoId, $nome, $municipio, $estado]);
+        $stmt->execute([$projetoId, $nome, $municipio, $estado, $lat, $lng]);
         $id = $db->lastInsertId();
 
         Security::auditLog('cadastro', 'nucleos', $id);
@@ -160,10 +163,13 @@ class AdminNucleosController
             exit;
         }
 
+        $lat = isset($_POST['latitude'])  && $_POST['latitude']  !== '' ? (float) $_POST['latitude']  : null;
+        $lng = isset($_POST['longitude']) && $_POST['longitude'] !== '' ? (float) $_POST['longitude'] : null;
+
         $stmt = $db->prepare(
-            "UPDATE nucleos SET projeto_id=?, nome=?, municipio=?, estado=? WHERE id=?"
+            "UPDATE nucleos SET projeto_id=?, nome=?, municipio=?, estado=?, latitude=?, longitude=? WHERE id=?"
         );
-        $stmt->execute([$projetoId, $nome, $municipio, $estado, (int) $id]);
+        $stmt->execute([$projetoId, $nome, $municipio, $estado, $lat, $lng, (int) $id]);
 
         Security::auditLog('edicao', 'nucleos', $id);
         $_SESSION['flash_success'] = "Núcleo \"$nome\" atualizado.";

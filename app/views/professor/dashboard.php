@@ -59,6 +59,24 @@ ob_start();
 
 </div>
 
+<!-- Check-in -->
+<div class="card mb-6">
+  <div class="card-header" style="display:flex;align-items:center;gap:.5rem">
+    <i data-lucide="map-pin" style="width:16px;height:16px;color:var(--azul-marinho);stroke-width:2"></i>
+    <span style="font-weight:700;font-size:.9rem">Check-in de presença</span>
+  </div>
+  <div class="card-body">
+    <p class="text-sm text-muted" style="margin:0 0 1rem">
+      Confirme sua presença no local de aula. O sistema registra sua localização e notifica o administrador.
+    </p>
+    <button type="button" id="btnCheckin" class="btn btn-primary">
+      <i data-lucide="map-pin" style="width:16px;height:16px;stroke-width:2"></i>
+      Fazer check-in
+    </button>
+    <div id="checkinMsg" style="display:none;margin-top:.875rem"></div>
+  </div>
+</div>
+
 <!-- Ações rápidas -->
 <div class="card mb-6">
   <div class="card-header">
@@ -79,6 +97,83 @@ ob_start();
     </a>
   </div>
 </div>
+
+<script>
+(function () {
+  var CSRF_TOKEN = '<?= Security::esc(Security::csrfToken()) ?>';
+  var CHECKIN_URL = '<?= Security::esc(APP_URL) ?>/api/checkin';
+
+  var btn = document.getElementById('btnCheckin');
+  var msg = document.getElementById('checkinMsg');
+
+  var errorMessages = {
+    1: 'Permissão de localização negada. Ative o GPS no navegador e recarregue.',
+    2: 'Localização indisponível. Verifique se o GPS está ativado.',
+    3: 'Tempo esgotado ao obter localização. Tente em local aberto.'
+  };
+
+  function showMsg(html, type) {
+    msg.innerHTML = html;
+    msg.className = 'alert alert-' + type;
+    msg.style.display = 'flex';
+  }
+
+  function resetBtn() {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="map-pin" style="width:16px;height:16px;stroke-width:2"></i> Fazer check-in';
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+
+  btn.addEventListener('click', function () {
+    if (!navigator.geolocation) {
+      showMsg('Geolocalização não suportada neste dispositivo.', 'warning');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Obtendo localização…';
+    msg.style.display = 'none';
+
+    navigator.geolocation.getCurrentPosition(
+      function (pos) {
+        btn.textContent = 'Registrando check-in…';
+
+        var fd = new FormData();
+        fd.append('csrf_token', CSRF_TOKEN);
+        fd.append('lat', pos.coords.latitude);
+        fd.append('lng', pos.coords.longitude);
+
+        fetch(CHECKIN_URL, { method: 'POST', body: fd })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            resetBtn();
+            if (!d.ok) {
+              showMsg(d.error || 'Erro ao registrar check-in.', 'error');
+              return;
+            }
+            var icon = d.status === 'dentro_raio' ? '✅' : d.status === 'fora_raio' ? '⚠️' : '📍';
+            var text = d.status === 'dentro_raio'
+              ? 'Check-in registrado! Você está no local do núcleo.'
+              : d.status === 'fora_raio'
+                ? 'Check-in registrado! Você está fora do raio de 200 m do núcleo.'
+                : 'Check-in registrado! O administrador foi notificado.';
+            var alertType = d.status === 'dentro_raio' ? 'success' : d.status === 'fora_raio' ? 'warning' : 'info';
+            showMsg(icon + ' ' + text, alertType);
+          })
+          .catch(function () {
+            resetBtn();
+            showMsg('Erro de conexão. Tente novamente.', 'error');
+          });
+      },
+      function (err) {
+        resetBtn();
+        showMsg(errorMessages[err.code] || 'Erro ao obter localização.', 'warning');
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  });
+})();
+</script>
 
 <!-- Aniversariantes -->
 <?php if (!empty($aniversariantes)): ?>

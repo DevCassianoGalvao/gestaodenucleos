@@ -15,6 +15,7 @@ if ($perfil === 'super_admin') {
         ['href' => APP_URL . '/admin/professores',   'label' => 'Professores',     'icon' => 'users',            'key' => 'professores'],
         ['label' => 'Monitoramento', 'section' => true],
         ['href' => APP_URL . '/admin/monitor',       'label' => 'Monitor',         'icon' => 'activity',         'key' => 'monitor'],
+        ['href' => APP_URL . '/admin/checkins',      'label' => 'Check-ins',       'icon' => 'map-pin',          'key' => 'checkins'],
         ['href' => APP_URL . '/admin/exportacao',    'label' => 'Exportação',      'icon' => 'download',         'key' => 'exportacao'],
     ];
 } elseif ($perfil === 'professor') {

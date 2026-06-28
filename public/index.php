@@ -82,8 +82,9 @@ $routes = [
         '/admin/professores/novo'               => ['AdminProfessoresController','formNovo'],
         '/admin/professores/{id}/editar'        => ['AdminProfessoresController','formEditar'],
 
-        // Admin — monitor + exportação
+        // Admin — monitor + check-ins + exportação
         '/admin/monitor'                        => ['AdminMonitorController',    'index'],
+        '/admin/checkins'                       => ['AdminCheckinsController',   'index'],
         '/admin/exportacao'                     => ['AdminExportacaoController', 'index'],
         '/admin/exportacao/download'            => ['AdminExportacaoController', 'download'],
 
@@ -143,6 +144,9 @@ $routes = [
 
         // Professor — horários
         '/professor/horarios'                   => ['ProfessorHorariosController',   'save'],
+
+        // Check-in de geolocalização
+        '/api/checkin'                          => ['CheckinController',             'store'],
     ],
 ];
 

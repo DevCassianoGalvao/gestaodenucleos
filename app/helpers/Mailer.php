@@ -217,6 +217,56 @@ class Mailer
         return $ok;
     }
 
+    /** Notificar super_admin sobre check-in de professor com resultado de geolocalização */
+    public static function notifyCheckin(
+        string $nomeProfessor,
+        string $nucleo,
+        string $endereco,
+        float  $lat,
+        float  $lng,
+        ?int   $distanciaM,
+        string $status
+    ): bool {
+        require_once __DIR__ . '/Brevo.php';
+
+        $dataHora = date('d/m/Y \à\s H:i');
+
+        if ($status === 'dentro_raio') {
+            $statusHtml = '<span style="display:inline-block;background:#D1FAE5;color:#065F46;padding:.25rem .75rem;border-radius:4px;font-weight:700;font-size:.8rem">✅ No local — dentro de ' . (int)$distanciaM . ' m</span>';
+        } elseif ($status === 'fora_raio') {
+            $statusHtml = '<span style="display:inline-block;background:#FEE2E2;color:#991B1B;padding:.25rem .75rem;border-radius:4px;font-weight:700;font-size:.8rem">⚠️ Fora do raio — ' . number_format((int)$distanciaM) . ' m de distância</span>';
+        } else {
+            $statusHtml = '<span style="display:inline-block;background:#F3F4F6;color:#6B7280;padding:.25rem .75rem;border-radius:4px;font-weight:700;font-size:.8rem">📍 Localização registrada (núcleo sem coordenadas)</span>';
+        }
+
+        $mapsUrl = 'https://www.google.com/maps?q=' . urlencode($lat . ',' . $lng);
+
+        $body = self::p("Um professor realizou check-in na plataforma.")
+              . '<table style="width:100%;border-collapse:collapse;margin:0 0 1rem;font-size:.875rem">
+                   <tr style="background:#EFF6FF"><td style="padding:.5rem .75rem;font-weight:600;color:#1A3A6B;width:35%">Professor</td><td style="padding:.5rem .75rem">' . htmlspecialchars($nomeProfessor, ENT_QUOTES, 'UTF-8') . '</td></tr>
+                   <tr><td style="padding:.5rem .75rem;font-weight:600;color:#1A3A6B">Núcleo</td><td style="padding:.5rem .75rem">' . htmlspecialchars($nucleo, ENT_QUOTES, 'UTF-8') . '</td></tr>
+                   <tr style="background:#EFF6FF"><td style="padding:.5rem .75rem;font-weight:600;color:#1A3A6B">Data / Hora</td><td style="padding:.5rem .75rem">' . $dataHora . '</td></tr>
+                   <tr><td style="padding:.5rem .75rem;font-weight:600;color:#1A3A6B">Endereço</td><td style="padding:.5rem .75rem">' . htmlspecialchars($endereco, ENT_QUOTES, 'UTF-8') . '</td></tr>
+                   <tr style="background:#EFF6FF"><td style="padding:.5rem .75rem;font-weight:600;color:#1A3A6B">Status</td><td style="padding:.5rem .75rem">' . $statusHtml . '</td></tr>
+                 </table>'
+              . '<p style="text-align:center;margin:1rem 0">
+                   <a href="' . $mapsUrl . '" target="_blank"
+                      style="background:#1A3A6B;color:#fff;text-decoration:none;padding:.5rem 1.25rem;border-radius:6px;font-weight:700;font-size:.85rem;display:inline-block">
+                     Ver no Google Maps
+                   </a>
+                 </p>';
+
+        $subject = 'Check-in: ' . $nomeProfessor . ' — ' . APP_NAME;
+        $ok = Brevo::send(
+            [['email' => ADMIN_EMAIL, 'name' => 'Administrador']],
+            $subject,
+            self::template('Check-in de Professor', $body, 'Ver check-ins', APP_URL . '/admin/checkins')
+        );
+
+        self::logNotif('checkin', ADMIN_EMAIL, "$nomeProfessor — $nucleo — $status", $ok);
+        return $ok;
+    }
+
     /** Enviar comunicado para lista de destinatários */
     public static function sendComunicado(string $titulo, string $corpo, array $destinatarios): bool
     {
