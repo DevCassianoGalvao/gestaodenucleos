@@ -13,6 +13,9 @@ if ($perfil === 'super_admin') {
         ['href' => APP_URL . '/admin/projetos',      'label' => 'Projetos',        'icon' => 'folder',           'key' => 'projetos'],
         ['href' => APP_URL . '/admin/nucleos',       'label' => 'Núcleos',         'icon' => 'map-pin',          'key' => 'nucleos'],
         ['href' => APP_URL . '/admin/professores',   'label' => 'Professores',     'icon' => 'users',            'key' => 'professores'],
+        ['label' => 'Cronograma', 'section' => true],
+        ['href' => APP_URL . '/admin/cronograma',    'label' => 'Cronograma',      'icon' => 'calendar-clock',   'key' => 'cronograma'],
+        ['href' => APP_URL . '/admin/aulas',         'label' => 'Aulas',           'icon' => 'clipboard-check',  'key' => 'aulas'],
         ['label' => 'Monitoramento', 'section' => true],
         ['href' => APP_URL . '/admin/monitor',       'label' => 'Monitor',         'icon' => 'activity',         'key' => 'monitor'],
         ['href' => APP_URL . '/admin/checkins',      'label' => 'Check-ins',       'icon' => 'map-pin',          'key' => 'checkins'],
@@ -25,7 +28,8 @@ if ($perfil === 'super_admin') {
         ['label' => 'Núcleo', 'section' => true],
         ['href' => APP_URL . '/professor/alunos',    'label' => 'Alunos',          'icon' => 'users',            'key' => 'alunos'],
         ['href' => APP_URL . '/professor/frequencia','label' => 'Frequência',      'icon' => 'check-square',     'key' => 'frequencia'],
-        ['href' => APP_URL . '/professor/horarios',  'label' => 'Horários',        'icon' => 'calendar',         'key' => 'horarios'],
+        ['href' => APP_URL . '/professor/agenda',    'label' => 'Minha Agenda',    'icon' => 'calendar-clock',   'key' => 'agenda'],
+        ['href' => APP_URL . '/professor/justificativas', 'label' => 'Justificativas', 'icon' => 'file-text',   'key' => 'justificativas'],
     ];
 } elseif ($perfil === 'aluno') {
     $navItems = [

@@ -41,6 +41,7 @@ $db->exec('SET FOREIGN_KEY_CHECKS = 0');
 foreach ([
     'audit_log','login_attempts','notificacoes_log',
     'forum_posts','forum_topicos','comunicados','materiais',
+    'justificativas_ausencia','aulas_previstas',
     'grade_horarios','chamada_presencas','chamadas',
     'convites','alunos','nucleo_professores','nucleos','projetos','usuarios',
 ] as $t) {
@@ -185,8 +186,8 @@ $horarios = [
     ['dia_semana' => 5, 'horario_inicio' => '08:00', 'horario_fim' => '09:30'], // Sex
 ];
 foreach ($horarios as $h) {
-    insert($db, 'grade_horarios', array_merge(['nucleo_id' => $nuc1], $h));
-    insert($db, 'grade_horarios', array_merge(['nucleo_id' => $nuc2], $h));
+    insert($db, 'grade_horarios', array_merge(['nucleo_id' => $nuc1, 'professor_id' => $prof1], $h));
+    insert($db, 'grade_horarios', array_merge(['nucleo_id' => $nuc2, 'professor_id' => $prof2], $h));
 }
 ok("Grade de horários: Seg/Qua/Sex 08h–09h30 criada para ambos os núcleos");
 

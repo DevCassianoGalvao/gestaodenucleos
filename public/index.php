@@ -23,6 +23,34 @@ if ($appBasePath !== '' && str_starts_with($uri, $appBasePath)) {
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+// ─── Bloqueio obrigatório: justificativa de aula não realizada ───────────────
+// Professor com aula "justificativa_pendente" não pode usar o sistema normalmente
+// até resolver todas as pendências. Ele continua autenticado — apenas é
+// redirecionado de volta para a tela de justificativa em qualquer outra rota.
+if (Auth::check() && ($_SESSION['perfil'] ?? '') === 'professor') {
+    $rotaLivre = $uri === '/professor/justificativas'
+        || preg_match('#^/professor/justificativas/\d+$#', $uri)
+        || $uri === '/logout';
+
+    if (!$rotaLivre) {
+        require_once ROOT_PATH . '/app/helpers/Cronograma.php';
+        $db = Database::getInstance();
+        Cronograma::gerarOcorrenciasParaData($db, date('Y-m-d'), (int) Auth::id());
+        Cronograma::atualizarPendencias($db, (int) Auth::id());
+
+        if (Cronograma::temPendencia($db, (int) Auth::id())) {
+            if (str_starts_with($uri, '/api/')) {
+                http_response_code(423); // Locked
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode(['error' => 'Existem justificativas de aula pendentes.', 'redirect' => APP_URL . '/professor/justificativas']);
+                exit;
+            }
+            header('Location: ' . APP_URL . '/professor/justificativas');
+            exit;
+        }
+    }
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function loadController(string $name): void
 {
@@ -88,6 +116,14 @@ $routes = [
         '/admin/exportacao'                     => ['AdminExportacaoController', 'index'],
         '/admin/exportacao/download'            => ['AdminExportacaoController', 'download'],
 
+        // Admin — cronograma de aulas
+        '/admin/cronograma'                     => ['AdminCronogramaController', 'index'],
+        '/admin/cronograma/novo'                => ['AdminCronogramaController', 'formNovo'],
+        '/admin/cronograma/{id}/editar'         => ['AdminCronogramaController', 'formEditar'],
+
+        // Admin — acompanhamento de aulas (previstas/realizadas/justificadas/canceladas)
+        '/admin/aulas'                          => ['AdminAulasController',      'index'],
+
         // Professor — dashboard
         '/professor/dashboard'                  => ['ProfessorController',           'dashboard'],
 
@@ -102,8 +138,11 @@ $routes = [
         '/professor/frequencia/nova'            => ['ProfessorFrequenciaController', 'formNova'],
         '/professor/frequencia/{id}'            => ['ProfessorFrequenciaController', 'show'],
 
-        // Professor — horários
-        '/professor/horarios'                   => ['ProfessorHorariosController',   'index'],
+        // Professor — minha agenda
+        '/professor/agenda'                     => ['ProfessorAgendaController',     'index'],
+
+        // Professor — justificativa de aula não realizada
+        '/professor/justificativas'             => ['JustificativaController',       'pendentes'],
 
         // Aluno
         '/aluno/dashboard'                      => ['AlunoController',               'dashboard'],
@@ -132,6 +171,16 @@ $routes = [
         '/admin/professores/{id}/editar'        => ['AdminProfessoresController',    'update'],
         '/admin/professores/{id}/inativar'      => ['AdminProfessoresController',    'inativar'],
 
+        // Admin — cronograma de aulas
+        '/admin/cronograma/novo'                => ['AdminCronogramaController',     'store'],
+        '/admin/cronograma/{id}/editar'         => ['AdminCronogramaController',     'update'],
+        '/admin/cronograma/{id}/inativar'       => ['AdminCronogramaController',     'inativar'],
+        '/admin/cronograma/{id}/reativar'       => ['AdminCronogramaController',     'reativar'],
+        '/admin/cronograma/{id}/excluir'        => ['AdminCronogramaController',     'excluir'],
+
+        // Admin — cancelamento administrativo de aula prevista
+        '/admin/aulas/{id}/cancelar'            => ['AdminAulasController',          'cancelar'],
+
         // Professor — alunos
         '/professor/alunos/convite'             => ['ProfessorAlunosController',     'gerarConvite'],
         '/professor/alunos/convite/revogar'     => ['ProfessorAlunosController',     'revogarConvite'],
@@ -142,8 +191,8 @@ $routes = [
         // Professor — frequência
         '/professor/frequencia/nova'            => ['ProfessorFrequenciaController', 'store'],
 
-        // Professor — horários
-        '/professor/horarios'                   => ['ProfessorHorariosController',   'save'],
+        // Professor — justificativa de aula não realizada
+        '/professor/justificativas/{id}'        => ['JustificativaController',       'store'],
 
         // Check-in de geolocalização
         '/api/checkin'                          => ['CheckinController',             'store'],
