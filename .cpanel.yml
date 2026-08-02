@@ -3,3 +3,4 @@ deployment:
   tasks:
     - /bin/mkdir -p logs uploads
     - /usr/bin/test -f config/config.php || /bin/cp config/config.example.php config/config.php
+    - php database/aplicar_migrations.php
