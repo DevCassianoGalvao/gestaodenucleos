@@ -10,6 +10,9 @@ RewriteBase /gestaodenucleos/
 # Block direct access to sensitive directories
 RewriteRule ^(app|config|cron|database|logs)(/|$) - [F,L]
 
+# Block access to .git internals (repo is cloned into the doc root for cPanel deploy)
+RewriteRule ^\.git(/|$) - [F,L]
+
 # Serve real files directly (assets, uploads). Existing directories must still
 # pass through the front controller, otherwise the application root returns 403.
 RewriteCond %{REQUEST_FILENAME} -f

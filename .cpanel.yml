@@ -1,4 +1,5 @@
 ---
 deployment:
   tasks:
-    - /bin/echo "Deploy concluido com sucesso"
+    - /bin/mkdir -p logs uploads
+    - /usr/bin/test -f config/config.php || /bin/cp config/config.example.php config/config.php
