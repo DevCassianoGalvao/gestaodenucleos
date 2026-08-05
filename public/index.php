@@ -139,6 +139,10 @@ $routes = [
         // Admin — chamadas (detalhe + correção)
         '/admin/chamadas/{id}'                  => ['AdminChamadasController',   'show'],
 
+        // Admin — depoimentos
+        '/admin/depoimentos'                    => ['AdminDepoimentosController', 'index'],
+        '/admin/depoimentos/novo'               => ['AdminDepoimentosController', 'formNovo'],
+
         // Professor — dashboard
         '/professor/dashboard'                  => ['ProfessorController',           'dashboard'],
 
@@ -210,6 +214,10 @@ $routes = [
 
         // Admin — correção de chamada
         '/admin/chamadas/{id}/corrigir'         => ['AdminChamadasController',       'corrigir'],
+
+        // Admin — depoimentos
+        '/admin/depoimentos/novo'               => ['AdminDepoimentosController',    'store'],
+        '/admin/depoimentos/{id}/excluir'       => ['AdminDepoimentosController',    'excluir'],
 
         // Professor — alunos
         '/professor/alunos/convite'             => ['ProfessorAlunosController',     'gerarConvite'],
