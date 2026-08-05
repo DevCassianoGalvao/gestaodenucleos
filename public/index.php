@@ -106,6 +106,11 @@ $routes = [
         '/admin/projetos/novo'                  => ['AdminProjetosController',   'formNovo'],
         '/admin/projetos/{id}/editar'           => ['AdminProjetosController',   'formEditar'],
 
+        // Admin — termos de fomento
+        '/admin/projetos/{projetoId}/termos'      => ['AdminTermosFomentoController', 'index'],
+        '/admin/projetos/{projetoId}/termos/novo' => ['AdminTermosFomentoController', 'formNovo'],
+        '/admin/termos/{id}/editar'               => ['AdminTermosFomentoController', 'formEditar'],
+
         // Admin — núcleos
         '/admin/nucleos'                        => ['AdminNucleosController',    'index'],
         '/admin/nucleos/novo'                   => ['AdminNucleosController',    'formNovo'],
@@ -171,6 +176,13 @@ $routes = [
         '/admin/projetos/novo'                  => ['AdminProjetosController',   'store'],
         '/admin/projetos/{id}/editar'           => ['AdminProjetosController',   'update'],
         '/admin/projetos/{id}/inativar'         => ['AdminProjetosController',   'inativar'],
+
+        // Admin — termos de fomento
+        '/admin/projetos/{projetoId}/termos/novo' => ['AdminTermosFomentoController', 'store'],
+        '/admin/termos/{id}/editar'               => ['AdminTermosFomentoController', 'update'],
+        '/admin/termos/{id}/status'                => ['AdminTermosFomentoController', 'mudarStatus'],
+        '/admin/termos/{id}/anexos'                => ['AdminTermosFomentoController', 'storeAnexo'],
+        '/admin/termos/anexos/{anexoId}/excluir'   => ['AdminTermosFomentoController', 'excluirAnexo'],
 
         // Admin — núcleos
         '/admin/nucleos/novo'                   => ['AdminNucleosController',    'store'],

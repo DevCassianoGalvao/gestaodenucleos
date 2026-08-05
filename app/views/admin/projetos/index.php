@@ -106,6 +106,10 @@ ob_start();
             <td data-label="Criado em" class="text-sm text-muted"><?= date('d/m/Y', strtotime($p['criado_em'])) ?></td>
             <td data-label="Ações" data-actions>
               <div style="display:flex;justify-content:flex-end;gap:.5rem">
+                <a href="<?= Security::esc(APP_URL) ?>/admin/projetos/<?= $p['id'] ?>/termos" class="btn btn-outline btn-sm">
+                  <i data-lucide="file-text" style="width:14px;height:14px;stroke-width:2"></i>
+                  Termos
+                </a>
                 <a href="<?= Security::esc(APP_URL) ?>/admin/projetos/<?= $p['id'] ?>/editar" class="btn btn-outline btn-sm">
                   <i data-lucide="pencil" style="width:14px;height:14px;stroke-width:2"></i>
                   Editar
