@@ -9,7 +9,8 @@ class AdminCronogramaController
 
     public function index(): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('cronograma.visualizar');
         $db = Database::getInstance();
 
         $professorId = (int) ($_GET['professor_id'] ?? 0);
@@ -19,15 +20,18 @@ class AdminCronogramaController
         $page        = max(1, (int) ($_GET['page'] ?? 1));
         $off         = ($page - 1) * self::PER_PAGE;
 
-        $conditions = [];
-        $params     = [];
+        $permitidos = Escopo::nucleosPermitidos(Auth::id());
+        [$escopoWhere, $escopoParams] = Escopo::whereIn($permitidos, 'gh.nucleo_id');
+
+        $conditions = [$escopoWhere];
+        $params     = $escopoParams;
 
         if ($professorId) { $conditions[] = 'gh.professor_id = ?'; $params[] = $professorId; }
         if ($nucleoId)    { $conditions[] = 'gh.nucleo_id = ?';    $params[] = $nucleoId; }
         if ($diaSemana !== '' && ctype_digit((string) $diaSemana)) { $conditions[] = 'gh.dia_semana = ?'; $params[] = (int) $diaSemana; }
         if ($status && in_array($status, ['ativo', 'inativo'], true)) { $conditions[] = 'gh.status = ?'; $params[] = $status; }
 
-        $where = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+        $where = 'WHERE ' . implode(' AND ', $conditions);
 
         $countStmt = $db->prepare("SELECT COUNT(*) FROM grade_horarios gh $where");
         $countStmt->execute($params);
@@ -46,8 +50,8 @@ class AdminCronogramaController
         $stmt->execute($params);
         $horarios = $stmt->fetchAll();
 
-        $professores = $db->query("SELECT id, nome FROM usuarios WHERE perfil='professor' AND status='ativo' ORDER BY nome")->fetchAll();
-        $nucleos     = $db->query("SELECT n.id, n.nome, p.nome AS projeto FROM nucleos n JOIN projetos p ON p.id=n.projeto_id WHERE n.status='ativo' ORDER BY p.nome, n.nome")->fetchAll();
+        $professores = $this->professoresDisponiveis($db);
+        $nucleos     = $this->nucleosDisponiveis($db);
         $dias        = Cronograma::DIAS;
         $totalPages  = (int) ceil($total / self::PER_PAGE);
 
@@ -57,12 +61,13 @@ class AdminCronogramaController
 
     public function formNovo(): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('cronograma.administrar');
         $db = Database::getInstance();
 
         $horario     = null;
-        $professores = $db->query("SELECT id, nome FROM usuarios WHERE perfil='professor' AND status='ativo' ORDER BY nome")->fetchAll();
-        $nucleos     = $db->query("SELECT n.id, n.nome, p.nome AS projeto FROM nucleos n JOIN projetos p ON p.id=n.projeto_id WHERE n.status='ativo' ORDER BY p.nome, n.nome")->fetchAll();
+        $professores = $this->professoresDisponiveis($db);
+        $nucleos     = $this->nucleosDisponiveis($db);
         $dias        = Cronograma::DIAS;
         $errors      = $_SESSION['form_errors'] ?? [];
         $oldData     = $_SESSION['form_data']   ?? [];
@@ -90,6 +95,8 @@ class AdminCronogramaController
 
         if (!$nucleoId) {
             $errors['nucleo_id'] = 'Selecione a turma/projeto (núcleo).';
+        } elseif (!Escopo::podeAcessarNucleo(Auth::id(), $nucleoId)) {
+            $errors['nucleo_id'] = 'Você não tem acesso a esse núcleo.';
         } else {
             $stmt = $db->prepare("SELECT id FROM nucleos WHERE id=? AND status='ativo' LIMIT 1");
             $stmt->execute([$nucleoId]);
@@ -108,7 +115,8 @@ class AdminCronogramaController
 
     public function store(): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('cronograma.administrar');
         Security::verifyCsrf();
         $db = Database::getInstance();
 
@@ -152,7 +160,8 @@ class AdminCronogramaController
 
     public function formEditar(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('cronograma.administrar');
         $db   = Database::getInstance();
         $stmt = $db->prepare("SELECT * FROM grade_horarios WHERE id = ? LIMIT 1");
         $stmt->execute([(int) $id]);
@@ -163,12 +172,17 @@ class AdminCronogramaController
             header('Location: ' . APP_URL . '/admin/cronograma');
             exit;
         }
+        if (!Escopo::podeAcessarNucleo(Auth::id(), (int) $horario['nucleo_id'])) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
+            exit;
+        }
 
         $horario['horario_inicio'] = substr($horario['horario_inicio'], 0, 5);
         $horario['horario_fim']    = substr($horario['horario_fim'], 0, 5);
 
-        $professores = $db->query("SELECT id, nome FROM usuarios WHERE perfil='professor' AND status='ativo' ORDER BY nome")->fetchAll();
-        $nucleos     = $db->query("SELECT n.id, n.nome, p.nome AS projeto FROM nucleos n JOIN projetos p ON p.id=n.projeto_id WHERE n.status='ativo' ORDER BY p.nome, n.nome")->fetchAll();
+        $professores = $this->professoresDisponiveis($db);
+        $nucleos     = $this->nucleosDisponiveis($db);
         $dias        = Cronograma::DIAS;
         $errors      = $_SESSION['form_errors'] ?? [];
         $oldData     = $_SESSION['form_data']   ?? [];
@@ -179,7 +193,8 @@ class AdminCronogramaController
 
     public function update(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('cronograma.administrar');
         Security::verifyCsrf();
         $db = Database::getInstance();
         $id = (int) $id;
@@ -190,6 +205,11 @@ class AdminCronogramaController
         if (!$horario) {
             $_SESSION['flash_error'] = 'Horário não encontrado.';
             header('Location: ' . APP_URL . '/admin/cronograma');
+            exit;
+        }
+        if (!Escopo::podeAcessarNucleo(Auth::id(), (int) $horario['nucleo_id'])) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
             exit;
         }
 
@@ -237,10 +257,17 @@ class AdminCronogramaController
 
     public function inativar(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('cronograma.administrar');
         Security::verifyCsrf();
         $db = Database::getInstance();
         $id = (int) $id;
+
+        if (!$this->horarioNoEscopo($db, $id)) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
+            exit;
+        }
 
         require_once ROOT_PATH . '/app/helpers/Cronograma.php';
 
@@ -265,10 +292,17 @@ class AdminCronogramaController
 
     public function reativar(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('cronograma.administrar');
         Security::verifyCsrf();
         $db = Database::getInstance();
         $id = (int) $id;
+
+        if (!$this->horarioNoEscopo($db, $id)) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
+            exit;
+        }
 
         require_once ROOT_PATH . '/app/helpers/Cronograma.php';
 
@@ -285,10 +319,17 @@ class AdminCronogramaController
 
     public function excluir(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('cronograma.administrar');
         Security::verifyCsrf();
         $db = Database::getInstance();
         $id = (int) $id;
+
+        if (!$this->horarioNoEscopo($db, $id)) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
+            exit;
+        }
 
         require_once ROOT_PATH . '/app/helpers/Cronograma.php';
 
@@ -311,5 +352,39 @@ class AdminCronogramaController
         $_SESSION['flash_success'] = 'Horário excluído.';
         header('Location: ' . APP_URL . '/admin/cronograma');
         exit;
+    }
+
+    private function horarioNoEscopo(PDO $db, int $id): bool
+    {
+        $stmt = $db->prepare("SELECT nucleo_id FROM grade_horarios WHERE id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        $nucleoId = $stmt->fetchColumn();
+        return $nucleoId && Escopo::podeAcessarNucleo(Auth::id(), (int) $nucleoId);
+    }
+
+    private function nucleosDisponiveis(PDO $db): array
+    {
+        $ids = Escopo::nucleosPermitidos(Auth::id());
+        if (!$ids) return [];
+        [$where, $params] = Escopo::whereIn($ids, 'n.id');
+        $stmt = $db->prepare("SELECT n.id, n.nome, p.nome AS projeto FROM nucleos n JOIN projetos p ON p.id=n.projeto_id WHERE n.status='ativo' AND $where ORDER BY p.nome, n.nome");
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    private function professoresDisponiveis(PDO $db): array
+    {
+        // Professores vinculados a algum núcleo dentro do escopo do usuário logado.
+        $ids = Escopo::nucleosPermitidos(Auth::id());
+        if (!$ids) return [];
+        [$where, $params] = Escopo::whereIn($ids, 'np.nucleo_id');
+        $stmt = $db->prepare("
+            SELECT DISTINCT u.id, u.nome FROM usuarios u
+            JOIN nucleo_professores np ON np.usuario_id = u.id
+            WHERE u.perfil='professor' AND u.status='ativo' AND $where
+            ORDER BY u.nome
+        ");
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 }

@@ -2,16 +2,23 @@
 
 class DashboardController
 {
+    private array $escopoNucleos = [];
+
     // ── Auth + JSON bootstrap ─────────────────────────────────────────────────
 
     private function boot(): void
     {
         header('Content-Type: application/json; charset=utf-8');
-        if (!Auth::check() || Auth::perfil() !== 'super_admin') {
+        if (
+            !Auth::check()
+            || !in_array(Auth::perfil(), ['super_admin', 'gestor'], true)
+            || !Permissao::has(Auth::id(), 'dashboard.visualizar')
+        ) {
             http_response_code(403);
             echo json_encode(['error' => 'Acesso negado']);
             exit;
         }
+        $this->escopoNucleos = Escopo::nucleosPermitidos(Auth::id());
     }
 
     // ── Period helper ─────────────────────────────────────────────────────────
@@ -62,6 +69,10 @@ class DashboardController
 
     private function appendFilters(array &$where, array &$params, array $f, string $alias = 'n'): void
     {
+        [$escopoSql, $escopoParams] = Escopo::whereIn($this->escopoNucleos, "$alias.id");
+        $where[] = $escopoSql;
+        array_push($params, ...$escopoParams);
+
         if ($f['projeto_id'] > 0) { $where[] = "$alias.projeto_id = ?"; $params[] = $f['projeto_id']; }
         if ($f['municipio'] !== '') { $where[] = "$alias.municipio = ?"; $params[] = $f['municipio']; }
     }

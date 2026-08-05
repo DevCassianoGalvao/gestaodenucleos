@@ -1,8 +1,9 @@
 <?php
-$pageTitle   = 'Professores';
+$pageTitle   = 'Equipe';
 $activePage  = 'professores';
 
-$professores = $data['professores'] ?? [];
+$professores = $data['membros'] ?? [];
+$cargos      = $data['cargos']  ?? [];
 $q           = $data['q']          ?? '';
 $page        = $data['page']       ?? 1;
 $total       = $data['total']      ?? 0;
@@ -13,17 +14,17 @@ ob_start();
 
 <div class="page-header flex items-center justify-between">
   <div>
-    <h1 class="page-title">Professores</h1>
-    <p class="page-desc"><?= $total ?> professor<?= $total !== 1 ? 'es' : '' ?> cadastrado<?= $total !== 1 ? 's' : '' ?></p>
+    <h1 class="page-title">Equipe</h1>
+    <p class="page-desc"><?= $total ?> pessoa<?= $total !== 1 ? 's' : '' ?> na equipe (professores, coordenadores e demais colaboradores)</p>
   </div>
   <div class="page-actions">
     <a href="<?= Security::esc(APP_URL) ?>/admin/professores/convite" class="btn btn-outline">
       <i data-lucide="link" style="width:16px;height:16px;stroke-width:2"></i>
-      Gerar convite
+      Gerar convite de professor
     </a>
     <a href="<?= Security::esc(APP_URL) ?>/admin/professores/novo" class="btn btn-primary">
       <i data-lucide="user-plus" style="width:16px;height:16px;stroke-width:2.5"></i>
-      Cadastrar professor
+      Cadastrar pessoa
     </a>
   </div>
 </div>
@@ -48,7 +49,7 @@ ob_start();
   <?php if (empty($professores)): ?>
     <div class="empty-state">
       <i data-lucide="users" style="width:40px;height:40px;stroke:var(--cinza-borda);margin:0 auto 1rem"></i>
-      <p>Nenhum professor encontrado.</p>
+      <p>Nenhuma pessoa encontrada.</p>
       <a href="<?= Security::esc(APP_URL) ?>/admin/professores/convite" class="btn btn-primary mt-4">Gerar convite de professor</a>
     </div>
   <?php else: ?>
@@ -56,9 +57,9 @@ ob_start();
       <table class="responsive-table">
         <thead>
           <tr>
-            <th>Professor</th>
+            <th>Pessoa</th>
+            <th>Cargo</th>
             <th>Núcleo(s)</th>
-            <th>Chamadas este mês</th>
             <th>Última chamada</th>
             <th>Status</th>
             <th style="text-align:right">Ações</th>
@@ -70,11 +71,11 @@ ob_start();
             $diasSemChamada = $prof['ultima_chamada']
               ? (int) round((time() - strtotime($prof['ultima_chamada'])) / 86400)
               : null;
-            $inativo = $diasSemChamada === null || $diasSemChamada > 14;
+            $inativoOperacional = $prof['perfil'] === 'professor' && ($diasSemChamada === null || $diasSemChamada > 14);
             $nucleos = array_values(array_filter(explode('||', $prof['nucleos'] ?? '')));
           ?>
           <tr>
-            <td data-label="Professor" data-primary>
+            <td data-label="Pessoa" data-primary>
               <div style="display:flex;align-items:center;gap:.75rem">
                 <?php if ($prof['foto']): ?>
                   <img src="<?= Security::esc(APP_URL . '/uploads/' . $prof['foto']) ?>" alt="" width="36" height="36"
@@ -90,6 +91,11 @@ ob_start();
                 </div>
               </div>
             </td>
+            <td data-label="Cargo">
+              <span class="badge <?= $prof['perfil'] === 'gestor' ? 'badge-azul' : 'badge-cinza' ?>">
+                <?= Security::esc($cargos[$prof['cargo']] ?? ucfirst($prof['perfil'])) ?>
+              </span>
+            </td>
             <td data-label="Núcleos">
               <?php if ($nucleos): ?>
                 <div style="display:flex;flex-wrap:wrap;gap:.375rem;max-width:460px">
@@ -103,17 +109,18 @@ ob_start();
                 <span class="text-sm text-muted">—</span>
               <?php endif; ?>
             </td>
-            <td data-label="Chamadas este mês"><?= (int) $prof['chamadas_mes'] ?></td>
             <td data-label="Última chamada">
               <?php if ($prof['ultima_chamada']): ?>
-                <span class="text-sm <?= $inativo ? 'text-muted' : '' ?>">
+                <span class="text-sm <?= $inativoOperacional ? 'text-muted' : '' ?>">
                   <?= date('d/m/Y', strtotime($prof['ultima_chamada'])) ?>
                 </span>
-                <?php if ($inativo): ?>
+                <?php if ($inativoOperacional): ?>
                   <span class="badge badge-vermelho" style="margin-left:.375rem">Inativo</span>
                 <?php endif; ?>
-              <?php else: ?>
+              <?php elseif ($prof['perfil'] === 'professor'): ?>
                 <span class="badge badge-cinza">Sem chamadas</span>
+              <?php else: ?>
+                <span class="text-sm text-muted">—</span>
               <?php endif; ?>
             </td>
             <td data-label="Status"><span class="badge <?= $prof['status'] === 'ativo' ? 'badge-verde' : 'badge-cinza' ?>"><?= $prof['status'] === 'ativo' ? 'Ativo' : 'Inativo' ?></span></td>
@@ -127,7 +134,7 @@ ob_start();
                 <form method="POST" action="<?= Security::esc(APP_URL) ?>/admin/professores/<?= $prof['id'] ?>/inativar" style="display:inline">
                   <?= Security::csrfField() ?>
                   <button type="submit" class="btn btn-outline btn-sm"
-                    data-confirm="Inativar professor '<?= Security::esc($prof['nome']) ?>'? O histórico de chamadas será preservado."
+                    data-confirm="Inativar '<?= Security::esc($prof['nome']) ?>'? O histórico é preservado."
                     style="color:var(--vermelho);border-color:var(--cinza-borda)">
                     <i data-lucide="eye-off" style="width:14px;height:14px;stroke-width:2"></i>
                     Inativar

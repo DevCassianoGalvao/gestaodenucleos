@@ -7,11 +7,15 @@ class AdminAulasController
 
     public function index(): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('aulas.visualizar');
         $db = Database::getInstance();
 
         require_once ROOT_PATH . '/app/helpers/Cronograma.php';
         Cronograma::atualizarPendencias($db);
+
+        $permitidos = Escopo::nucleosPermitidos(Auth::id());
+        [$escopoWhere, $escopoParams] = Escopo::whereIn($permitidos, 'ap.nucleo_id');
 
         $professorId = (int) ($_GET['professor_id'] ?? 0);
         $nucleoId    = (int) ($_GET['nucleo_id']     ?? 0);
@@ -21,8 +25,8 @@ class AdminAulasController
         $page        = max(1, (int) ($_GET['page'] ?? 1));
         $off         = ($page - 1) * self::PER_PAGE;
 
-        $conditions = [];
-        $params     = [];
+        $conditions = [$escopoWhere];
+        $params     = $escopoParams;
 
         if ($professorId) { $conditions[] = 'ap.professor_id = ?'; $params[] = $professorId; }
         if ($nucleoId)    { $conditions[] = 'ap.nucleo_id = ?';    $params[] = $nucleoId; }
@@ -30,7 +34,7 @@ class AdminAulasController
         if ($dataInicio) { $conditions[] = 'ap.data >= ?'; $params[] = $dataInicio; }
         if ($dataFim)    { $conditions[] = 'ap.data <= ?'; $params[] = $dataFim; }
 
-        $where = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+        $where = 'WHERE ' . implode(' AND ', $conditions);
 
         $countStmt = $db->prepare("SELECT COUNT(*) FROM aulas_previstas ap $where");
         $countStmt->execute($params);
@@ -53,8 +57,21 @@ class AdminAulasController
         $stmt->execute($params);
         $aulas = $stmt->fetchAll();
 
-        $professores = $db->query("SELECT id, nome FROM usuarios WHERE perfil='professor' ORDER BY nome")->fetchAll();
-        $nucleos     = $db->query("SELECT id, nome FROM nucleos ORDER BY nome")->fetchAll();
+        $nucleosDisp = [];
+        if ($permitidos) {
+            [$w, $p] = Escopo::whereIn($permitidos, 'id');
+            $nucleosDisp = $db->prepare("SELECT id, nome FROM nucleos WHERE $w ORDER BY nome");
+            $nucleosDisp->execute($p);
+            $nucleosDisp = $nucleosDisp->fetchAll();
+        }
+        $professores = [];
+        if ($permitidos) {
+            [$w, $p] = Escopo::whereIn($permitidos, 'np.nucleo_id');
+            $professores = $db->prepare("SELECT DISTINCT u.id, u.nome FROM usuarios u JOIN nucleo_professores np ON np.usuario_id=u.id WHERE u.perfil='professor' AND $w ORDER BY u.nome");
+            $professores->execute($p);
+            $professores = $professores->fetchAll();
+        }
+        $nucleos     = $nucleosDisp;
         $totalPages  = (int) ceil($total / self::PER_PAGE);
 
         $data = compact('aulas', 'professores', 'nucleos', 'professorId', 'nucleoId', 'status', 'dataInicio', 'dataFim', 'page', 'total', 'totalPages');
@@ -63,7 +80,8 @@ class AdminAulasController
 
     public function cancelar(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('aulas.cancelar');
         Security::verifyCsrf();
         $db = Database::getInstance();
         $id = (int) $id;
@@ -75,13 +93,18 @@ class AdminAulasController
             exit;
         }
 
-        $stmt = $db->prepare("SELECT id, status FROM aulas_previstas WHERE id = ? LIMIT 1");
+        $stmt = $db->prepare("SELECT id, status, nucleo_id FROM aulas_previstas WHERE id = ? LIMIT 1");
         $stmt->execute([$id]);
         $aula = $stmt->fetch();
 
         if (!$aula) {
             $_SESSION['flash_error'] = 'Aula não encontrada.';
             header('Location: ' . APP_URL . '/admin/aulas');
+            exit;
+        }
+        if (!Escopo::podeAcessarNucleo(Auth::id(), (int) $aula['nucleo_id'])) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
             exit;
         }
 

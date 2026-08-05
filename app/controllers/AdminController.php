@@ -4,18 +4,29 @@ class AdminController
 {
     public function dashboard(): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('dashboard.visualizar');
         $db = Database::getInstance();
 
-        // Apenas opções para os filtros — dados vêm via JS/API
-        $projetos = $db->query(
-            "SELECT id, nome FROM projetos WHERE status='ativo' ORDER BY nome ASC"
-        )->fetchAll();
+        $nucleoIds  = Escopo::nucleosPermitidos(Auth::id());
+        $projetoIds = Escopo::projetosPermitidos(Auth::id());
 
-        $municipios = $db->query(
-            "SELECT DISTINCT n.municipio, n.projeto_id
-             FROM nucleos n WHERE n.status='ativo' ORDER BY n.municipio ASC"
-        )->fetchAll();
+        // Apenas opções para os filtros — dados vêm via JS/API (que também aplica escopo)
+        $projetos = [];
+        if ($projetoIds) {
+            [$w, $p] = Escopo::whereIn($projetoIds, 'id');
+            $projetos = $db->prepare("SELECT id, nome FROM projetos WHERE status='ativo' AND $w ORDER BY nome ASC");
+            $projetos->execute($p);
+            $projetos = $projetos->fetchAll();
+        }
+
+        $municipios = [];
+        if ($nucleoIds) {
+            [$w, $p] = Escopo::whereIn($nucleoIds, 'n.id');
+            $municipios = $db->prepare("SELECT DISTINCT n.municipio, n.projeto_id FROM nucleos n WHERE n.status='ativo' AND $w ORDER BY n.municipio ASC");
+            $municipios->execute($p);
+            $municipios = $municipios->fetchAll();
+        }
 
         $data = compact('projetos', 'municipios');
         require_once ROOT_PATH . '/app/views/admin/dashboard.php';

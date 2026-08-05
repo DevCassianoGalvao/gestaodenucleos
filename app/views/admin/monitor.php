@@ -8,6 +8,12 @@ $page        = $data['page']       ?? 1;
 $totalProf   = $data['totalProf']  ?? 0;
 $ativos7d    = $data['ativos7d']   ?? 0;
 $inativos14d = $data['inativos14d']?? 0;
+$institutos  = $data['institutos'] ?? [];
+$projetos    = $data['projetos']   ?? [];
+$nucleos     = $data['nucleos']    ?? [];
+$institutoId = $data['institutoId']?? 0;
+$projetoId   = $data['projetoId']  ?? 0;
+$nucleoId    = $data['nucleoId']   ?? 0;
 
 ob_start();
 ?>
@@ -46,9 +52,27 @@ ob_start();
     <form method="GET" action="" class="search-form">
       <input type="search" name="q" value="<?= Security::esc($q) ?>"
              placeholder="Buscar por professor ou núcleo…"
-             class="form-control" style="max-width:320px">
+             class="form-control" style="max-width:280px">
+      <select name="instituto_id" class="form-control" style="max-width:190px">
+        <option value="">Todos os institutos</option>
+        <?php foreach ($institutos as $i): ?>
+          <option value="<?= $i['id'] ?>" <?= $institutoId == $i['id'] ? 'selected' : '' ?>><?= Security::esc($i['nome']) ?></option>
+        <?php endforeach; ?>
+      </select>
+      <select name="projeto_id" class="form-control" style="max-width:190px">
+        <option value="">Todos os projetos</option>
+        <?php foreach ($projetos as $p): ?>
+          <option value="<?= $p['id'] ?>" <?= $projetoId == $p['id'] ? 'selected' : '' ?>><?= Security::esc($p['nome']) ?></option>
+        <?php endforeach; ?>
+      </select>
+      <select name="nucleo_id" class="form-control" style="max-width:190px">
+        <option value="">Todos os núcleos</option>
+        <?php foreach ($nucleos as $n): ?>
+          <option value="<?= $n['id'] ?>" <?= $nucleoId == $n['id'] ? 'selected' : '' ?>><?= Security::esc($n['nome']) ?></option>
+        <?php endforeach; ?>
+      </select>
       <button type="submit" class="btn btn-outline">Buscar</button>
-      <?php if ($q): ?>
+      <?php if ($q || $institutoId || $projetoId || $nucleoId): ?>
         <a href="<?= Security::esc(APP_URL) ?>/admin/monitor" class="btn btn-outline">Limpar</a>
       <?php endif; ?>
     </form>

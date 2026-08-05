@@ -38,7 +38,7 @@ ob_start();
           <?php foreach ($projetos as $p): ?>
             <option value="<?= $p['id'] ?>"
               <?= ((int)($oldData['projeto_id'] ?? $nucleo['projeto_id'] ?? 0)) == $p['id'] ? 'selected' : '' ?>>
-              <?= Security::esc($p['nome']) ?>
+              <?= Security::esc(($p['instituto'] ?? '') . ' — ' . $p['nome']) ?>
             </option>
           <?php endforeach; ?>
         </select>

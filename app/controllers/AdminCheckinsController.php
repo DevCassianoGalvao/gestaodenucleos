@@ -6,8 +6,12 @@ class AdminCheckinsController
 
     public function index(): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('checkins.visualizar');
         $db = Database::getInstance();
+
+        $permitidos = Escopo::nucleosPermitidos(Auth::id());
+        [$escopoWhere, $escopoParams] = Escopo::whereIn($permitidos, 'c.nucleo_id');
 
         $q          = Security::sanitize($_GET['q']         ?? '');
         $nucleoId   = (int) ($_GET['nucleo_id']              ?? 0);
@@ -17,8 +21,8 @@ class AdminCheckinsController
         $page       = max(1, (int) ($_GET['page']            ?? 1));
         $off        = ($page - 1) * self::PER_PAGE;
 
-        $conditions = [];
-        $params     = [];
+        $conditions = [$escopoWhere];
+        $params     = $escopoParams;
 
         if ($q) {
             $conditions[] = 'u.nome LIKE ?';
@@ -41,7 +45,7 @@ class AdminCheckinsController
             $params[]     = $dataFim;
         }
 
-        $where = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+        $where = 'WHERE ' . implode(' AND ', $conditions);
 
         $countStmt = $db->prepare("
             SELECT COUNT(*) FROM checkins c
@@ -67,7 +71,13 @@ class AdminCheckinsController
         $stmt->execute($params);
         $checkins = $stmt->fetchAll();
 
-        $nucleos    = $db->query("SELECT id, nome FROM nucleos WHERE status='ativo' ORDER BY nome")->fetchAll();
+        $nucleos = [];
+        if ($permitidos) {
+            [$w, $p] = Escopo::whereIn($permitidos, 'id');
+            $nucleos = $db->prepare("SELECT id, nome FROM nucleos WHERE status='ativo' AND $w ORDER BY nome");
+            $nucleos->execute($p);
+            $nucleos = $nucleos->fetchAll();
+        }
         $totalPages = (int) ceil($total / self::PER_PAGE);
 
         $data = compact('checkins','nucleos','q','nucleoId','statusFilt','dataInicio','dataFim','page','total','totalPages');
