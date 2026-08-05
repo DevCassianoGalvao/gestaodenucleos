@@ -37,6 +37,7 @@ if (in_array($perfil, ['super_admin', 'gestor'], true)) {
         ['label' => 'Núcleo', 'section' => true],
         ['href' => APP_URL . '/professor/alunos',    'label' => 'Alunos',          'icon' => 'users',            'key' => 'alunos'],
         ['href' => APP_URL . '/professor/frequencia','label' => 'Frequência',      'icon' => 'check-square',     'key' => 'frequencia'],
+        ['href' => APP_URL . '/professor/atividades','label' => 'Atividades',      'icon' => 'notebook-pen',     'key' => 'atividades'],
         ['href' => APP_URL . '/professor/agenda',    'label' => 'Minha Agenda',    'icon' => 'calendar-clock',   'key' => 'agenda'],
         ['href' => APP_URL . '/professor/justificativas', 'label' => 'Justificativas', 'icon' => 'file-text',   'key' => 'justificativas'],
     ];

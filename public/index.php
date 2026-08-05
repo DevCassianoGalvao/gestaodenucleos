@@ -111,6 +111,9 @@ $routes = [
         '/admin/projetos/{projetoId}/termos/novo' => ['AdminTermosFomentoController', 'formNovo'],
         '/admin/termos/{id}/editar'               => ['AdminTermosFomentoController', 'formEditar'],
 
+        // Admin — checklist configurável do projeto
+        '/admin/projetos/{projetoId}/requisitos'  => ['AdminProjetoRequisitosController', 'index'],
+
         // Admin — núcleos
         '/admin/nucleos'                        => ['AdminNucleosController',    'index'],
         '/admin/nucleos/novo'                   => ['AdminNucleosController',    'formNovo'],
@@ -156,6 +159,11 @@ $routes = [
         '/professor/frequencia'                 => ['ProfessorFrequenciaController', 'index'],
         '/professor/frequencia/nova'            => ['ProfessorFrequenciaController', 'formNova'],
         '/professor/frequencia/{id}'            => ['ProfessorFrequenciaController', 'show'],
+
+        // Professor — atividades diárias
+        '/professor/atividades'                 => ['ProfessorAtividadesController', 'index'],
+        '/professor/atividades/nova'            => ['ProfessorAtividadesController', 'formNovo'],
+        '/professor/atividades/{id}'            => ['ProfessorAtividadesController', 'show'],
 
         // Professor — minha agenda
         '/professor/agenda'                     => ['ProfessorAgendaController',     'index'],
@@ -219,6 +227,11 @@ $routes = [
         '/admin/depoimentos/novo'               => ['AdminDepoimentosController',    'store'],
         '/admin/depoimentos/{id}/excluir'       => ['AdminDepoimentosController',    'excluir'],
 
+        // Admin — checklist configurável do projeto
+        '/admin/projetos/{projetoId}/requisitos'   => ['AdminProjetoRequisitosController', 'store'],
+        '/admin/requisitos/{id}/status'            => ['AdminProjetoRequisitosController', 'alternarStatus'],
+        '/admin/requisitos/{id}/excluir'           => ['AdminProjetoRequisitosController', 'excluir'],
+
         // Professor — alunos
         '/professor/alunos/convite'             => ['ProfessorAlunosController',     'gerarConvite'],
         '/professor/alunos/convite/revogar'     => ['ProfessorAlunosController',     'revogarConvite'],
@@ -228,6 +241,9 @@ $routes = [
 
         // Professor — frequência
         '/professor/frequencia/nova'            => ['ProfessorFrequenciaController', 'store'],
+
+        // Professor — atividades diárias
+        '/professor/atividades/nova'            => ['ProfessorAtividadesController', 'store'],
 
         // Professor — justificativa de aula não realizada
         '/professor/justificativas/{id}'        => ['JustificativaController',       'store'],

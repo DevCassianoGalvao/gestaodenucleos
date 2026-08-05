@@ -110,6 +110,10 @@ ob_start();
                   <i data-lucide="file-text" style="width:14px;height:14px;stroke-width:2"></i>
                   Termos
                 </a>
+                <a href="<?= Security::esc(APP_URL) ?>/admin/projetos/<?= $p['id'] ?>/requisitos" class="btn btn-outline btn-sm">
+                  <i data-lucide="list-checks" style="width:14px;height:14px;stroke-width:2"></i>
+                  Checklist
+                </a>
                 <a href="<?= Security::esc(APP_URL) ?>/admin/projetos/<?= $p['id'] ?>/editar" class="btn btn-outline btn-sm">
                   <i data-lucide="pencil" style="width:14px;height:14px;stroke-width:2"></i>
                   Editar
