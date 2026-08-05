@@ -85,8 +85,18 @@ class Security
 
     // ─── Audit log (requires DB — active after Phase 2) ─────────────────────
 
-    public static function auditLog(string $acao, string $tabela = '', mixed $registroId = null): void
-    {
+    /**
+     * $dadosAnteriores/$dadosNovos: arrays associativos com os valores relevantes
+     * antes/depois — usar em operações sensíveis (correção de chamada, mudança
+     * de permissão/escopo, etc). Opcionais — chamadas antigas continuam válidas.
+     */
+    public static function auditLog(
+        string $acao,
+        string $tabela = '',
+        mixed $registroId = null,
+        ?array $dadosAnteriores = null,
+        ?array $dadosNovos = null
+    ): void {
         $userId = Auth::id();
         if (!$userId) {
             return;
@@ -95,14 +105,16 @@ class Security
         try {
             $db   = Database::getInstance();
             $stmt = $db->prepare(
-                "INSERT INTO audit_log (usuario_id, acao, tabela_afetada, registro_id, ip, user_agent, criado_em)
-                 VALUES (?, ?, ?, ?, ?, ?, NOW())"
+                "INSERT INTO audit_log (usuario_id, acao, tabela_afetada, registro_id, dados_anteriores, dados_novos, ip, user_agent, criado_em)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())"
             );
             $stmt->execute([
                 $userId,
                 $acao,
                 $tabela,
                 $registroId,
+                $dadosAnteriores !== null ? json_encode($dadosAnteriores) : null,
+                $dadosNovos !== null ? json_encode($dadosNovos) : null,
                 self::clientIp(),
                 $_SERVER['HTTP_USER_AGENT'] ?? '',
             ]);

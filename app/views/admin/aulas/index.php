@@ -104,18 +104,25 @@ ob_start();
               <?php endif; ?>
             </td>
             <td data-label="Ações" data-actions>
-              <?php if ($a['status'] === 'prevista'): ?>
-                <form method="POST" action="<?= Security::esc(APP_URL) ?>/admin/aulas/<?= $a['id'] ?>/cancelar" class="form-cancelar-aula" style="display:inline">
-                  <?= Security::csrfField() ?>
-                  <input type="hidden" name="motivo_cancelamento" class="motivo-cancelamento-input">
-                  <button type="submit" class="btn btn-outline btn-sm" style="color:var(--vermelho)">
-                    <i data-lucide="x-circle" style="width:14px;height:14px;stroke-width:2"></i>
-                    Cancelar aula
-                  </button>
-                </form>
-              <?php else: ?>
-                <span class="text-sm text-muted">—</span>
-              <?php endif; ?>
+              <div style="display:flex;justify-content:flex-end;gap:.5rem">
+                <?php if ($a['status'] === 'prevista'): ?>
+                  <form method="POST" action="<?= Security::esc(APP_URL) ?>/admin/aulas/<?= $a['id'] ?>/cancelar" class="form-cancelar-aula" style="display:inline">
+                    <?= Security::csrfField() ?>
+                    <input type="hidden" name="motivo_cancelamento" class="motivo-cancelamento-input">
+                    <button type="submit" class="btn btn-outline btn-sm" style="color:var(--vermelho)">
+                      <i data-lucide="x-circle" style="width:14px;height:14px;stroke-width:2"></i>
+                      Cancelar aula
+                    </button>
+                  </form>
+                <?php elseif ($a['status'] === 'realizada' && $a['chamada_id']): ?>
+                  <a href="<?= Security::esc(APP_URL) ?>/admin/chamadas/<?= $a['chamada_id'] ?>" class="btn btn-outline btn-sm">
+                    <i data-lucide="clipboard-list" style="width:14px;height:14px;stroke-width:2"></i>
+                    Ver chamada
+                  </a>
+                <?php else: ?>
+                  <span class="text-sm text-muted">—</span>
+                <?php endif; ?>
+              </div>
             </td>
           </tr>
           <?php endforeach; ?>

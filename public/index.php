@@ -136,6 +136,9 @@ $routes = [
         // Admin — acompanhamento de aulas (previstas/realizadas/justificadas/canceladas)
         '/admin/aulas'                          => ['AdminAulasController',      'index'],
 
+        // Admin — chamadas (detalhe + correção)
+        '/admin/chamadas/{id}'                  => ['AdminChamadasController',   'show'],
+
         // Professor — dashboard
         '/professor/dashboard'                  => ['ProfessorController',           'dashboard'],
 
@@ -204,6 +207,9 @@ $routes = [
 
         // Admin — cancelamento administrativo de aula prevista
         '/admin/aulas/{id}/cancelar'            => ['AdminAulasController',          'cancelar'],
+
+        // Admin — correção de chamada
+        '/admin/chamadas/{id}/corrigir'         => ['AdminChamadasController',       'corrigir'],
 
         // Professor — alunos
         '/professor/alunos/convite'             => ['ProfessorAlunosController',     'gerarConvite'],

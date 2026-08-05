@@ -111,6 +111,9 @@ ob_start();
               <?php else: ?>
                 <span class="text-muted">—</span>
               <?php endif; ?>
+              <?php if ($c['precisao_m'] !== null): ?>
+                <div class="text-xs text-muted">GPS ±<?= (int) $c['precisao_m'] ?>m</div>
+              <?php endif; ?>
             </td>
             <td data-label="Status" style="text-align:center">
               <span class="badge badge-<?= $s['badge'] ?>" style="display:inline-flex;align-items:center;gap:.25rem">

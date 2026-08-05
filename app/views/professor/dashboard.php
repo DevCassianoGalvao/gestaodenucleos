@@ -142,6 +142,7 @@ ob_start();
         fd.append('csrf_token', CSRF_TOKEN);
         fd.append('lat', pos.coords.latitude);
         fd.append('lng', pos.coords.longitude);
+        if (pos.coords.accuracy != null) fd.append('precisao', pos.coords.accuracy);
 
         fetch(CHECKIN_URL, { method: 'POST', body: fd })
           .then(function (r) { return r.json(); })

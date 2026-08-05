@@ -25,8 +25,9 @@ class CheckinController
         }
 
         // Validar coordenadas
-        $lat = isset($_POST['lat']) ? (float) $_POST['lat'] : null;
-        $lng = isset($_POST['lng']) ? (float) $_POST['lng'] : null;
+        $lat      = isset($_POST['lat']) ? (float) $_POST['lat'] : null;
+        $lng      = isset($_POST['lng']) ? (float) $_POST['lng'] : null;
+        $precisao = isset($_POST['precisao']) && $_POST['precisao'] !== '' ? max(0, (int) round((float) $_POST['precisao'])) : null;
 
         if ($lat === null || $lng === null
             || $lat < -90  || $lat > 90
@@ -77,10 +78,10 @@ class CheckinController
 
         // Gravar check-in
         $stmt = $db->prepare("
-            INSERT INTO checkins (professor_id, nucleo_id, latitude, longitude, endereco, distancia_m, status, criado_em)
-            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+            INSERT INTO checkins (professor_id, nucleo_id, latitude, longitude, precisao_m, endereco, distancia_m, status, criado_em)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
-        $stmt->execute([$profId, (int) $nucleo['id'], $lat, $lng, $endereco, $distancia, $status]);
+        $stmt->execute([$profId, (int) $nucleo['id'], $lat, $lng, $precisao, $endereco, $distancia, $status]);
 
         // Nome do professor para o e-mail
         $profStmt = $db->prepare("SELECT nome FROM usuarios WHERE id = ? LIMIT 1");

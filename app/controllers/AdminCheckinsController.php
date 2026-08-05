@@ -56,7 +56,7 @@ class AdminCheckinsController
         $total = (int) $countStmt->fetchColumn();
 
         $stmt = $db->prepare("
-            SELECT c.id, c.latitude, c.longitude, c.endereco, c.distancia_m, c.status, c.criado_em,
+            SELECT c.id, c.latitude, c.longitude, c.precisao_m, c.endereco, c.distancia_m, c.status, c.criado_em,
                    u.nome AS professor_nome,
                    n.nome AS nucleo_nome,
                    p.nome AS projeto_nome
