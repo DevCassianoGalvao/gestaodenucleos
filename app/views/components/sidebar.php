@@ -20,6 +20,7 @@ if (in_array($perfil, ['super_admin', 'gestor'], true)) {
         ['label' => 'Cronograma', 'section' => true],
         ['href' => APP_URL . '/admin/cronograma',    'label' => 'Cronograma',      'icon' => 'calendar-clock',   'key' => 'cronograma',   'perm' => 'cronograma.visualizar'],
         ['href' => APP_URL . '/admin/aulas',         'label' => 'Aulas',           'icon' => 'clipboard-check',  'key' => 'aulas',        'perm' => 'aulas.visualizar'],
+        ['href' => APP_URL . '/admin/evidencias',    'label' => 'Evidências',      'icon' => 'image',            'key' => 'evidencias',   'perm' => 'evidencias.visualizar'],
         ['href' => APP_URL . '/admin/depoimentos',   'label' => 'Depoimentos',     'icon' => 'quote',            'key' => 'depoimentos',  'perm' => 'depoimentos.visualizar'],
         ['label' => 'Monitoramento', 'section' => true],
         ['href' => APP_URL . '/admin/monitor',       'label' => 'Monitor',         'icon' => 'activity',         'key' => 'monitor',      'perm' => 'monitoramento.visualizar'],

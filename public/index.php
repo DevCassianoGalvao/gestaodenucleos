@@ -142,6 +142,9 @@ $routes = [
         // Admin — chamadas (detalhe + correção)
         '/admin/chamadas/{id}'                  => ['AdminChamadasController',   'show'],
 
+        // Admin — evidências
+        '/admin/evidencias'                     => ['AdminEvidenciasController', 'index'],
+
         // Admin — depoimentos
         '/admin/depoimentos'                    => ['AdminDepoimentosController', 'index'],
         '/admin/depoimentos/novo'               => ['AdminDepoimentosController', 'formNovo'],
