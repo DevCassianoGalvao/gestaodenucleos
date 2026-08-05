@@ -107,12 +107,12 @@ $routes = [
         '/admin/projetos/{id}/editar'           => ['AdminProjetosController',   'formEditar'],
 
         // Admin — termos de fomento
-        '/admin/projetos/{projetoId}/termos'      => ['AdminTermosFomentoController', 'index'],
-        '/admin/projetos/{projetoId}/termos/novo' => ['AdminTermosFomentoController', 'formNovo'],
+        '/admin/projetos/{projeto_id}/termos'      => ['AdminTermosFomentoController', 'index'],
+        '/admin/projetos/{projeto_id}/termos/novo' => ['AdminTermosFomentoController', 'formNovo'],
         '/admin/termos/{id}/editar'               => ['AdminTermosFomentoController', 'formEditar'],
 
         // Admin — checklist configurável do projeto
-        '/admin/projetos/{projetoId}/requisitos'  => ['AdminProjetoRequisitosController', 'index'],
+        '/admin/projetos/{projeto_id}/requisitos'  => ['AdminProjetoRequisitosController', 'index'],
 
         // Admin — núcleos
         '/admin/nucleos'                        => ['AdminNucleosController',    'index'],
@@ -156,7 +156,7 @@ $routes = [
 
         // Admin — prestação de contas
         '/admin/prestacao-contas'               => ['AdminPrestacaoContasController', 'index'],
-        '/admin/prestacao-contas/{termoId}'     => ['AdminPrestacaoContasController', 'consolidado'],
+        '/admin/prestacao-contas/{termo_id}'     => ['AdminPrestacaoContasController', 'consolidado'],
 
         // Professor — dashboard
         '/professor/dashboard'                  => ['ProfessorController',           'dashboard'],
@@ -205,11 +205,11 @@ $routes = [
         '/admin/projetos/{id}/inativar'         => ['AdminProjetosController',   'inativar'],
 
         // Admin — termos de fomento
-        '/admin/projetos/{projetoId}/termos/novo' => ['AdminTermosFomentoController', 'store'],
+        '/admin/projetos/{projeto_id}/termos/novo' => ['AdminTermosFomentoController', 'store'],
         '/admin/termos/{id}/editar'               => ['AdminTermosFomentoController', 'update'],
         '/admin/termos/{id}/status'                => ['AdminTermosFomentoController', 'mudarStatus'],
         '/admin/termos/{id}/anexos'                => ['AdminTermosFomentoController', 'storeAnexo'],
-        '/admin/termos/anexos/{anexoId}/excluir'   => ['AdminTermosFomentoController', 'excluirAnexo'],
+        '/admin/termos/anexos/{anexo_id}/excluir'   => ['AdminTermosFomentoController', 'excluirAnexo'],
 
         // Admin — núcleos
         '/admin/nucleos/novo'                   => ['AdminNucleosController',    'store'],
@@ -240,7 +240,7 @@ $routes = [
         '/admin/depoimentos/{id}/excluir'       => ['AdminDepoimentosController',    'excluir'],
 
         // Admin — checklist configurável do projeto
-        '/admin/projetos/{projetoId}/requisitos'   => ['AdminProjetoRequisitosController', 'store'],
+        '/admin/projetos/{projeto_id}/requisitos'   => ['AdminProjetoRequisitosController', 'store'],
         '/admin/requisitos/{id}/status'            => ['AdminProjetoRequisitosController', 'alternarStatus'],
         '/admin/requisitos/{id}/excluir'           => ['AdminProjetoRequisitosController', 'excluir'],
 
