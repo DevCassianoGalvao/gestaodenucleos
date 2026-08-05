@@ -17,7 +17,7 @@ ob_start();
     <h1 class="page-title" style="margin-top:.25rem">Frequência</h1>
     <p class="page-desc"><?= count($linhas) ?> aluno<?= count($linhas) !== 1 ? 's' : '' ?> no período</p>
   </div>
-  <a href="?<?= http_build_query(array_merge($_GET, ['export' => 'csv'])) ?>" class="btn btn-outline">
+  <a href="?<?= Security::esc(http_build_query(array_merge($_GET, ['export' => 'csv']))) ?>" class="btn btn-outline">
     <i data-lucide="download" style="width:16px;height:16px;stroke-width:2"></i>
     Exportar CSV
   </a>
