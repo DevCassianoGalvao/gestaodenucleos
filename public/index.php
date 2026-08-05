@@ -146,6 +146,15 @@ $routes = [
         '/admin/depoimentos'                    => ['AdminDepoimentosController', 'index'],
         '/admin/depoimentos/novo'               => ['AdminDepoimentosController', 'formNovo'],
 
+        // Admin — relatórios
+        '/admin/relatorios'                     => ['AdminRelatoriosController', 'index'],
+        '/admin/relatorios/inscritos'           => ['AdminRelatoriosController', 'inscritos'],
+        '/admin/relatorios/frequencia'          => ['AdminRelatoriosController', 'frequencia'],
+
+        // Admin — prestação de contas
+        '/admin/prestacao-contas'               => ['AdminPrestacaoContasController', 'index'],
+        '/admin/prestacao-contas/{termoId}'     => ['AdminPrestacaoContasController', 'consolidado'],
+
         // Professor — dashboard
         '/professor/dashboard'                  => ['ProfessorController',           'dashboard'],
 

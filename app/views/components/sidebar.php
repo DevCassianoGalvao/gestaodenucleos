@@ -24,6 +24,8 @@ if (in_array($perfil, ['super_admin', 'gestor'], true)) {
         ['label' => 'Monitoramento', 'section' => true],
         ['href' => APP_URL . '/admin/monitor',       'label' => 'Monitor',         'icon' => 'activity',         'key' => 'monitor',      'perm' => 'monitoramento.visualizar'],
         ['href' => APP_URL . '/admin/checkins',      'label' => 'Check-ins',       'icon' => 'map-pin',          'key' => 'checkins',     'perm' => 'checkins.visualizar'],
+        ['href' => APP_URL . '/admin/relatorios',    'label' => 'Relatórios',      'icon' => 'bar-chart-3',      'key' => 'relatorios',   'perm' => 'relatorios.visualizar'],
+        ['href' => APP_URL . '/admin/prestacao-contas', 'label' => 'Prestação de Contas', 'icon' => 'file-check-2', 'key' => 'prestacao_contas', 'perm' => 'prestacao_contas.visualizar'],
         ['href' => APP_URL . '/admin/exportacao',    'label' => 'Exportação',      'icon' => 'download',         'key' => 'exportacao',   'perm' => 'exportacao.executar'],
     ];
     // Filtra por permissão (super_admin sempre passa — Permissao::has faz bypass).
