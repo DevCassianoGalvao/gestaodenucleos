@@ -68,6 +68,18 @@ class ProfessorFrequenciaController
         $nucleoId = $this->assertNucleo();
         $db       = Database::getInstance();
 
+        // Lançamento retroativo liberado por justificativa de falta de internet (Etapa 15-16)
+        $retroativa = null;
+        $retroativaId = (int) ($_GET['retroativa'] ?? 0);
+        if ($retroativaId) {
+            $retroativa = $this->buscarRetroativaLiberada($db, $retroativaId);
+            if (!$retroativa) {
+                $_SESSION['flash_error'] = 'Lançamento retroativo não disponível para essa aula.';
+                header('Location: ' . APP_URL . '/professor/justificativas');
+                exit;
+            }
+        }
+
         // Alunos ativos do núcleo
         $stmt = $db->prepare(
             "SELECT id, nome, foto FROM alunos
@@ -83,18 +95,32 @@ class ProfessorFrequenciaController
             exit;
         }
 
-        // Sugerir próxima data: hoje por padrão
-        $dataHoje = date('Y-m-d');
+        // Sugerir próxima data: hoje por padrão, ou a data da aula no lançamento retroativo
+        $dataHoje = $retroativa ? $retroativa['data'] : date('Y-m-d');
 
-        // Verificar se já há chamada hoje
+        // Verificar se já há chamada nessa data
         $jaExiste = $db->prepare(
             "SELECT id FROM chamadas WHERE nucleo_id = ? AND data_aula = ? LIMIT 1"
         );
         $jaExiste->execute([$nucleoId, $dataHoje]);
-        $chamadaExistente = $jaExiste->fetch();
+        $chamadaExistente = $retroativa ? null : $jaExiste->fetch();
 
-        $data = compact('alunos', 'dataHoje', 'chamadaExistente');
+        $data = compact('alunos', 'dataHoje', 'chamadaExistente', 'retroativa');
         require_once ROOT_PATH . '/app/views/professor/frequencia/nova.php';
+    }
+
+    /** Aula com justificativa "sem_internet" enviada, pertencente ao professor logado, ainda sem chamada lançada. */
+    private function buscarRetroativaLiberada(PDO $db, int $aulaPrevistaId): array|false
+    {
+        $stmt = $db->prepare("
+            SELECT ap.*, ja.id AS justificativa_id
+            FROM aulas_previstas ap
+            JOIN justificativas_ausencia ja ON ja.aula_prevista_id = ap.id
+            WHERE ap.id = ? AND ap.professor_id = ? AND ja.tipo = 'sem_internet' AND ap.chamada_id IS NULL
+            LIMIT 1
+        ");
+        $stmt->execute([$aulaPrevistaId, Auth::id()]);
+        return $stmt->fetch();
     }
 
     public function store(): void
@@ -102,8 +128,19 @@ class ProfessorFrequenciaController
         Auth::requireRole('professor');
         Security::verifyCsrf();
         $nucleoId = $this->assertNucleo();
+        $db       = Database::getInstance();
 
-        $dataAula = Security::sanitize($_POST['data_aula'] ?? '');
+        // Lançamento retroativo: a data vem do registro da aula prevista, nunca do
+        // input do usuário — evita que alguém "lance retroativo" pra data arbitrária.
+        $retroativaId = (int) ($_POST['aula_prevista_id'] ?? 0);
+        $retroativa   = $retroativaId ? $this->buscarRetroativaLiberada($db, $retroativaId) : null;
+        if ($retroativaId && !$retroativa) {
+            $_SESSION['flash_error'] = 'Lançamento retroativo não disponível para essa aula.';
+            header('Location: ' . APP_URL . '/professor/justificativas');
+            exit;
+        }
+
+        $dataAula  = $retroativa ? $retroativa['data'] : Security::sanitize($_POST['data_aula'] ?? '');
         $presentes = $_POST['presentes'] ?? []; // array of aluno IDs marked present
 
         if (!$dataAula || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dataAula)) {
@@ -118,8 +155,6 @@ class ProfessorFrequenciaController
             header('Location: ' . APP_URL . '/professor/frequencia/nova');
             exit;
         }
-
-        $db = Database::getInstance();
 
         // Check if chamada already exists for this date/nucleo
         $exists = $db->prepare(
@@ -147,12 +182,42 @@ class ProfessorFrequenciaController
 
         $presentesSet = array_flip(array_filter((array) $presentes, fn($v) => is_numeric($v)));
 
+        // Evidências (Etapa 16) — opcionais, fotos já com data/hora/local gravadas
+        // pelo app externo do professor. Só validadas/enviadas se houver arquivo.
+        $arquivosEvidencia = [];
+        if ($retroativa && !empty($_FILES['evidencias']['name'][0])) {
+            require_once ROOT_PATH . '/app/helpers/Upload.php';
+            $count = count($_FILES['evidencias']['name']);
+            for ($i = 0; $i < $count; $i++) {
+                if ($_FILES['evidencias']['error'][$i] !== UPLOAD_ERR_OK) continue;
+                $file = [
+                    'name'     => $_FILES['evidencias']['name'][$i],
+                    'type'     => $_FILES['evidencias']['type'][$i],
+                    'tmp_name' => $_FILES['evidencias']['tmp_name'][$i],
+                    'error'    => $_FILES['evidencias']['error'][$i],
+                    'size'     => $_FILES['evidencias']['size'][$i],
+                ];
+                try {
+                    $arquivosEvidencia[] = Upload::image($file, 'evidencias', 1600, 1600, 85);
+                } catch (RuntimeException $e) {
+                    $_SESSION['flash_error'] = 'Evidência: ' . $e->getMessage();
+                    header('Location: ' . APP_URL . '/professor/frequencia/nova?retroativa=' . $retroativaId);
+                    exit;
+                }
+            }
+        }
+
         $db->beginTransaction();
         try {
             $chamadaStmt = $db->prepare(
-                "INSERT INTO chamadas (nucleo_id, professor_id, data_aula, criado_em) VALUES (?, ?, ?, NOW())"
+                "INSERT INTO chamadas (nucleo_id, professor_id, data_aula, registrado_retroativamente, justificativa_ausencia_id, criado_em)
+                 VALUES (?, ?, ?, ?, ?, NOW())"
             );
-            $chamadaStmt->execute([$nucleoId, Auth::id(), $dataAula]);
+            $chamadaStmt->execute([
+                $nucleoId, Auth::id(), $dataAula,
+                $retroativa ? 1 : 0,
+                $retroativa ? $retroativa['justificativa_id'] : null,
+            ]);
             $chamadaId = (int) $db->lastInsertId();
 
             $presStmt = $db->prepare(
@@ -161,6 +226,28 @@ class ProfessorFrequenciaController
             foreach ($todosIds as $alunoId) {
                 $presente = isset($presentesSet[$alunoId]) ? 1 : 0;
                 $presStmt->execute([$chamadaId, $alunoId, $presente]);
+            }
+
+            if ($retroativa) {
+                $db->prepare("UPDATE aulas_previstas SET chamada_id = ? WHERE id = ?")->execute([$chamadaId, $retroativa['id']]);
+
+                if ($arquivosEvidencia) {
+                    $db->prepare(
+                        "INSERT INTO atividades (nucleo_id, professor_id, aula_prevista_id, chamada_id, data, descricao, registrado_retroativamente, criado_em)
+                         VALUES (?, ?, ?, ?, ?, ?, 1, NOW())"
+                    )->execute([
+                        $nucleoId, Auth::id(), $retroativa['id'], $chamadaId, $dataAula,
+                        'Lançamento retroativo — aula sem registro no dia por falta de internet no local.',
+                    ]);
+                    $atividadeId = (int) $db->lastInsertId();
+
+                    $evStmt = $db->prepare(
+                        "INSERT INTO atividade_evidencias (atividade_id, tipo, arquivo_path, enviado_por, criado_em) VALUES (?, 'foto', ?, ?, NOW())"
+                    );
+                    foreach ($arquivosEvidencia as $path) {
+                        $evStmt->execute([$atividadeId, $path, Auth::id()]);
+                    }
+                }
             }
 
             $db->commit();
@@ -176,7 +263,8 @@ class ProfessorFrequenciaController
         Security::auditLog('cadastro', 'chamadas', $chamadaId);
 
         $_SESSION['flash_success'] = sprintf(
-            'Chamada registrada para %s — %d/%d presente%s.',
+            '%sChamada registrada para %s — %d/%d presente%s.',
+            $retroativa ? 'Lançamento retroativo concluído. ' : '',
             date('d/m/Y', strtotime($dataAula)),
             $totalPresentes,
             count($todosIds),

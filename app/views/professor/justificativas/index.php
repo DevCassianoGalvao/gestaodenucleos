@@ -41,7 +41,18 @@ ob_start();
         <form method="POST" action="<?= Security::esc(APP_URL) ?>/professor/justificativas/<?= $p['id'] ?>">
           <?= Security::csrfField() ?>
           <div class="form-group" style="margin-bottom:.75rem">
-            <label class="form-label" for="motivo-<?= $p['id'] ?>">Por que esta aula não foi realizada? <span style="color:var(--vermelho)">*</span></label>
+            <label class="form-label" for="tipo-<?= $p['id'] ?>">Motivo</label>
+            <select id="tipo-<?= $p['id'] ?>" name="tipo" class="form-control">
+              <option value="chuva">Chuva / condições climáticas</option>
+              <option value="problema_local">Problema no local</option>
+              <option value="sem_internet">Falta de internet no local</option>
+              <option value="imprevisto">Imprevisto</option>
+              <option value="outro" selected>Outro</option>
+            </select>
+            <div class="form-hint">Se for falta de internet, você poderá lançar a chamada dessa aula retroativamente depois de enviar.</div>
+          </div>
+          <div class="form-group" style="margin-bottom:.75rem">
+            <label class="form-label" for="motivo-<?= $p['id'] ?>">Explique o que aconteceu <span style="color:var(--vermelho)">*</span></label>
             <textarea id="motivo-<?= $p['id'] ?>" name="motivo" class="form-control <?= $errorId == $p['id'] && isset($errors['motivo']) ? 'is-invalid' : '' ?>"
                       rows="3" placeholder="Ex.: chuva, problema no local, imprevisto…" required><?= $errorId == $p['id'] ? Security::esc($_POST['motivo'] ?? '') : '' ?></textarea>
             <?php if ($errorId == $p['id'] && isset($errors['motivo'])): ?>
@@ -78,6 +89,7 @@ ob_start();
             <th>Turma</th>
             <th>Motivo</th>
             <th>Enviada em</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -87,6 +99,14 @@ ob_start();
             <td data-label="Turma"><?= Security::esc($h['nucleo_nome']) ?></td>
             <td data-label="Motivo"><?= Security::esc($h['motivo']) ?></td>
             <td data-label="Enviada em" class="text-sm text-muted"><?= date('d/m/Y H:i', strtotime($h['enviado_em'])) ?></td>
+            <td data-label="" data-actions>
+              <?php if ($h['tipo'] === 'sem_internet' && !$h['ja_lancada']): ?>
+                <a href="<?= Security::esc(APP_URL) ?>/professor/frequencia/nova?retroativa=<?= $h['aula_prevista_id'] ?>" class="btn btn-primary btn-sm">
+                  <i data-lucide="upload" style="width:14px;height:14px;stroke-width:2"></i>
+                  Lançar chamada
+                </a>
+              <?php endif; ?>
+            </td>
           </tr>
           <?php endforeach; ?>
         </tbody>

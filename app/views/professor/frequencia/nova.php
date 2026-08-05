@@ -5,6 +5,7 @@ $activePage = 'frequencia';
 $alunos           = $data['alunos']           ?? [];
 $dataHoje         = $data['dataHoje']         ?? date('Y-m-d');
 $chamadaExistente = $data['chamadaExistente'] ?? null;
+$retroativa       = $data['retroativa']       ?? null;
 
 ob_start();
 ?>
@@ -20,25 +21,44 @@ ob_start();
   </div>
 </div>
 
-<?php if ($chamadaExistente): ?>
+<?php if ($retroativa): ?>
+<div class="alert alert-warning mb-4">
+  <i data-lucide="wifi-off" style="width:16px;height:16px;flex-shrink:0"></i>
+  <span>Lançamento retroativo — liberado pela sua justificativa de falta de internet. A data é fixa: <strong><?= date('d/m/Y', strtotime($retroativa['data'])) ?></strong>.</span>
+</div>
+<?php elseif ($chamadaExistente): ?>
 <div class="alert alert-warning mb-4">
   <i data-lucide="alert-triangle" style="width:16px;height:16px;flex-shrink:0"></i>
   <span>Já existe uma chamada registrada para <strong>hoje</strong>. Você pode registrar para outra data.</span>
 </div>
 <?php endif; ?>
 
-<form method="POST" action="<?= Security::esc(APP_URL) ?>/professor/frequencia/nova" novalidate>
+<form method="POST" action="<?= Security::esc(APP_URL) ?>/professor/frequencia/nova" enctype="multipart/form-data" novalidate>
   <?= Security::csrfField() ?>
+  <?php if ($retroativa): ?><input type="hidden" name="aula_prevista_id" value="<?= $retroativa['id'] ?>"><?php endif; ?>
 
   <div class="card mb-4" style="max-width:360px">
     <div class="card-body">
       <div class="form-group" style="margin:0">
         <label class="form-label" for="data_aula">Data da aula <span style="color:var(--vermelho)">*</span></label>
         <input type="date" id="data_aula" name="data_aula" class="form-control"
-               value="<?= Security::esc($dataHoje) ?>" max="<?= date('Y-m-d') ?>" required>
+               value="<?= Security::esc($dataHoje) ?>" max="<?= date('Y-m-d') ?>" required
+               <?= $retroativa ? 'readonly disabled' : '' ?>>
       </div>
     </div>
   </div>
+
+  <?php if ($retroativa): ?>
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="form-group" style="margin:0">
+        <label class="form-label" for="evidencias">Evidências (fotos da atividade, opcional)</label>
+        <input type="file" id="evidencias" name="evidencias[]" class="form-control" accept="image/*" multiple>
+        <div class="form-hint">Se você usou um app que grava data/hora/localização na própria foto, pode anexar aqui.</div>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
 
   <div class="card mb-6">
     <div class="card-header" style="display:flex;align-items:center;justify-content:space-between">

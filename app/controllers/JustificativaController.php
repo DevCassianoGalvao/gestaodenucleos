@@ -14,8 +14,9 @@ class JustificativaController
         $pendentes = Cronograma::pendentesDoProfessor($db, $professorId);
 
         $stmt = $db->prepare("
-            SELECT ap.data, ap.horario_inicio, ap.horario_fim, n.nome AS nucleo_nome,
-                   ja.motivo, ja.enviado_em
+            SELECT ap.id AS aula_prevista_id, ap.data, ap.horario_inicio, ap.horario_fim, n.nome AS nucleo_nome,
+                   ja.motivo, ja.tipo, ja.enviado_em,
+                   (ap.chamada_id IS NOT NULL) AS ja_lancada
             FROM justificativas_ausencia ja
             JOIN aulas_previstas ap ON ap.id = ja.aula_prevista_id
             JOIN nucleos n ON n.id = ap.nucleo_id
@@ -62,6 +63,10 @@ class JustificativaController
         }
 
         $motivo = Security::sanitize($_POST['motivo'] ?? '');
+        $tipo   = Security::sanitize($_POST['tipo'] ?? 'outro');
+        if (!in_array($tipo, ['sem_internet', 'chuva', 'problema_local', 'imprevisto', 'outro'], true)) {
+            $tipo = 'outro';
+        }
         if (mb_strlen($motivo) < 5) {
             $_SESSION['form_errors']   = ['motivo' => 'Descreva o motivo (mínimo 5 caracteres).'];
             $_SESSION['form_error_id'] = $id;
@@ -72,9 +77,9 @@ class JustificativaController
         $db->beginTransaction();
         try {
             $db->prepare(
-                "INSERT INTO justificativas_ausencia (aula_prevista_id, professor_id, motivo, enviado_em)
-                 VALUES (?, ?, ?, NOW())"
-            )->execute([$id, $professorId, $motivo]);
+                "INSERT INTO justificativas_ausencia (aula_prevista_id, professor_id, tipo, motivo, enviado_em)
+                 VALUES (?, ?, ?, ?, NOW())"
+            )->execute([$id, $professorId, $tipo, $motivo]);
 
             $db->prepare("UPDATE aulas_previstas SET status='justificada' WHERE id=?")->execute([$id]);
 
