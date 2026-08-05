@@ -41,9 +41,12 @@ $db->exec('SET FOREIGN_KEY_CHECKS = 0');
 foreach ([
     'audit_log','login_attempts','notificacoes_log',
     'forum_posts','forum_topicos','comunicados','materiais',
-    'justificativas_ausencia','aulas_previstas',
-    'grade_horarios','chamada_presencas','chamadas',
-    'convites','alunos','nucleo_professores','nucleos','projetos','usuarios',
+    'depoimentos','atividade_evidencias','atividades','projeto_requisitos',
+    'chamada_presenca_historico','justificativas_ausencia','aulas_previstas',
+    'grade_horarios','chamada_presencas','chamadas','checkins',
+    'termo_fomento_anexos','termos_fomento',
+    'usuario_permissoes','escopos_usuario',
+    'convites','alunos','nucleo_professores','nucleos','projetos','institutos','usuarios',
 ] as $t) {
     $db->exec("TRUNCATE TABLE `$t`");
 }
@@ -61,9 +64,20 @@ $adminId = insert($db, 'usuarios', [
 ]);
 ok("Super Admin criado  →  cassianogalvao2020@gmail.com / Admin@2024  (id=$adminId)");
 
+// ─── Institutos ───────────────────────────────────────────────────────────────
+
+$inst1 = insert($db, 'institutos', [
+    'nome'             => 'Instituto Dep. Federal Luiz Lima',
+    'descricao'        => 'Instituto responsável pelos projetos sociais e esportivos.',
+    'responsavel_nome' => 'Cassiano Galvão',
+    'status'           => 'ativo',
+]);
+ok("Instituto: Dep. Federal Luiz Lima (id=$inst1)");
+
 // ─── Projetos ─────────────────────────────────────────────────────────────────
 
 $proj1 = insert($db, 'projetos', [
+    'instituto_id' => $inst1,
     'nome'      => 'Friburgo em Movimento',
     'descricao' => 'Projeto esportivo multidisciplinar voltado à população de Nova Friburgo e região.',
     'status'    => 'ativo',
@@ -71,6 +85,7 @@ $proj1 = insert($db, 'projetos', [
 ok("Projeto: Friburgo em Movimento (id=$proj1)");
 
 $proj2 = insert($db, 'projetos', [
+    'instituto_id' => $inst1,
     'nome'      => 'Judô Infantil',
     'descricao' => 'Formação de atletas de judô na faixa etária de 6 a 14 anos no estado do RJ.',
     'status'    => 'ativo',

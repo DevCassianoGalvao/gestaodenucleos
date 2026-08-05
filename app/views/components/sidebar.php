@@ -1,26 +1,34 @@
 <?php
 $perfil     = Auth::perfil();
 $activePage = $activePage ?? '';
+$uid        = Auth::id();
 
-// Nav definitions per profile
+// Nav definitions per profile. Itens da área administrativa carregam 'perm' —
+// só aparecem se o usuário (super_admin ou gestor) tiver a permissão. Isso é
+// só UX: a proteção de verdade é feita em cada controller (Permissao::requer).
 $navItems = [];
 
-if ($perfil === 'super_admin') {
+if (in_array($perfil, ['super_admin', 'gestor'], true)) {
     $navItems = [
         ['label' => 'Visão geral', 'section' => true],
-        ['href' => APP_URL . '/admin/dashboard',     'label' => 'Dashboard',      'icon' => 'layout-dashboard', 'key' => 'dashboard'],
+        ['href' => APP_URL . '/admin/dashboard',     'label' => 'Dashboard',      'icon' => 'layout-dashboard', 'key' => 'dashboard',    'perm' => 'dashboard.visualizar'],
         ['label' => 'Gestão', 'section' => true],
-        ['href' => APP_URL . '/admin/projetos',      'label' => 'Projetos',        'icon' => 'folder',           'key' => 'projetos'],
-        ['href' => APP_URL . '/admin/nucleos',       'label' => 'Núcleos',         'icon' => 'map-pin',          'key' => 'nucleos'],
-        ['href' => APP_URL . '/admin/professores',   'label' => 'Professores',     'icon' => 'users',            'key' => 'professores'],
+        ['href' => APP_URL . '/admin/institutos',    'label' => 'Institutos',      'icon' => 'building-2',       'key' => 'institutos',   'perm' => 'institutos.visualizar'],
+        ['href' => APP_URL . '/admin/projetos',      'label' => 'Projetos',        'icon' => 'folder',           'key' => 'projetos',     'perm' => 'projetos.visualizar'],
+        ['href' => APP_URL . '/admin/nucleos',       'label' => 'Núcleos',         'icon' => 'map-pin',          'key' => 'nucleos',      'perm' => 'nucleos.visualizar'],
+        ['href' => APP_URL . '/admin/professores',   'label' => 'Equipe',          'icon' => 'users',            'key' => 'professores',  'perm' => 'equipe.visualizar'],
         ['label' => 'Cronograma', 'section' => true],
-        ['href' => APP_URL . '/admin/cronograma',    'label' => 'Cronograma',      'icon' => 'calendar-clock',   'key' => 'cronograma'],
-        ['href' => APP_URL . '/admin/aulas',         'label' => 'Aulas',           'icon' => 'clipboard-check',  'key' => 'aulas'],
+        ['href' => APP_URL . '/admin/cronograma',    'label' => 'Cronograma',      'icon' => 'calendar-clock',   'key' => 'cronograma',   'perm' => 'cronograma.visualizar'],
+        ['href' => APP_URL . '/admin/aulas',         'label' => 'Aulas',           'icon' => 'clipboard-check',  'key' => 'aulas',        'perm' => 'aulas.visualizar'],
         ['label' => 'Monitoramento', 'section' => true],
-        ['href' => APP_URL . '/admin/monitor',       'label' => 'Monitor',         'icon' => 'activity',         'key' => 'monitor'],
-        ['href' => APP_URL . '/admin/checkins',      'label' => 'Check-ins',       'icon' => 'map-pin',          'key' => 'checkins'],
-        ['href' => APP_URL . '/admin/exportacao',    'label' => 'Exportação',      'icon' => 'download',         'key' => 'exportacao'],
+        ['href' => APP_URL . '/admin/monitor',       'label' => 'Monitor',         'icon' => 'activity',         'key' => 'monitor',      'perm' => 'monitoramento.visualizar'],
+        ['href' => APP_URL . '/admin/checkins',      'label' => 'Check-ins',       'icon' => 'map-pin',          'key' => 'checkins',     'perm' => 'checkins.visualizar'],
+        ['href' => APP_URL . '/admin/exportacao',    'label' => 'Exportação',      'icon' => 'download',         'key' => 'exportacao',   'perm' => 'exportacao.executar'],
     ];
+    // Filtra por permissão (super_admin sempre passa — Permissao::has faz bypass).
+    $navItems = array_values(array_filter($navItems, function ($item) use ($uid) {
+        return !empty($item['section']) || Permissao::has($uid, $item['perm']);
+    }));
 } elseif ($perfil === 'professor') {
     $navItems = [
         ['label' => 'Visão geral', 'section' => true],

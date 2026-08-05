@@ -2,11 +2,13 @@
 $pageTitle  = 'Projetos';
 $activePage = 'projetos';
 
-$projetos   = $data['projetos']   ?? [];
-$q          = $data['q']          ?? '';
-$page       = $data['page']       ?? 1;
-$total      = $data['total']      ?? 0;
-$totalPages = $data['totalPages'] ?? 1;
+$projetos    = $data['projetos']    ?? [];
+$q           = $data['q']           ?? '';
+$institutoId = $data['institutoId'] ?? 0;
+$institutos  = $data['institutos']  ?? [];
+$page        = $data['page']        ?? 1;
+$total       = $data['total']       ?? 0;
+$totalPages  = $data['totalPages']  ?? 1;
 
 ob_start();
 ?>
@@ -34,8 +36,14 @@ ob_start();
         class="form-control"
         style="max-width:320px"
       >
+      <select name="instituto_id" class="form-control" style="max-width:220px">
+        <option value="">Todos os institutos</option>
+        <?php foreach ($institutos as $inst): ?>
+          <option value="<?= $inst['id'] ?>" <?= $institutoId == $inst['id'] ? 'selected' : '' ?>><?= Security::esc($inst['nome']) ?></option>
+        <?php endforeach; ?>
+      </select>
       <button type="submit" class="btn btn-outline">Buscar</button>
-      <?php if ($q): ?>
+      <?php if ($q || $institutoId): ?>
         <a href="<?= Security::esc(APP_URL) ?>/admin/projetos" class="btn btn-outline">Limpar</a>
       <?php endif; ?>
     </form>
@@ -55,6 +63,7 @@ ob_start();
         <thead>
           <tr>
             <th>Projeto</th>
+            <th>Instituto</th>
             <th>Núcleos ativos</th>
             <th>Status</th>
             <th>Criado em</th>
@@ -87,6 +96,7 @@ ob_start();
                 </div>
               </div>
             </td>
+            <td data-label="Instituto"><?= Security::esc($p['instituto_nome']) ?></td>
             <td data-label="Núcleos ativos"><?= $p['total_nucleos'] ?></td>
             <td data-label="Status">
               <span class="badge <?= $p['status'] === 'ativo' ? 'badge-verde' : 'badge-cinza' ?>">

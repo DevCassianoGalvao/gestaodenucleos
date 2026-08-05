@@ -6,50 +6,67 @@ class AdminProjetosController
 
     public function index(): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('projetos.visualizar');
         $db = Database::getInstance();
 
-        $q    = Security::sanitize($_GET['q'] ?? '');
-        $page = max(1, (int) ($_GET['page'] ?? 1));
-        $off  = ($page - 1) * self::PER_PAGE;
+        $permitidos = Escopo::projetosPermitidos(Auth::id());
+        [$escopoWhere, $escopoParams] = Escopo::whereIn($permitidos, 'p.id');
 
-        $where  = $q ? "WHERE p.nome LIKE ?" : '';
-        $params = $q ? ["%$q%"] : [];
+        $q          = Security::sanitize($_GET['q'] ?? '');
+        $institutoId = (int) ($_GET['instituto_id'] ?? 0);
+        $page       = max(1, (int) ($_GET['page'] ?? 1));
+        $off        = ($page - 1) * self::PER_PAGE;
 
-        $total = (int) $db->prepare(
-            "SELECT COUNT(*) FROM projetos p $where"
-        )->execute($params) ? ($total_stmt = $db->prepare("SELECT COUNT(*) FROM projetos p $where") and $total_stmt->execute($params) ? (int)$total_stmt->fetchColumn() : 0) : 0;
+        $conditions = [$escopoWhere];
+        $params     = $escopoParams;
+        if ($q) { $conditions[] = 'p.nome LIKE ?'; $params[] = "%$q%"; }
+        if ($institutoId) { $conditions[] = 'p.instituto_id = ?'; $params[] = $institutoId; }
+        $where = 'WHERE ' . implode(' AND ', $conditions);
 
-        // Rewritten cleanly
         $countStmt = $db->prepare("SELECT COUNT(*) FROM projetos p $where");
         $countStmt->execute($params);
         $total = (int) $countStmt->fetchColumn();
 
         $stmt = $db->prepare("
-            SELECT p.*,
+            SELECT p.*, i.nome AS instituto_nome,
                    COUNT(DISTINCT n.id) AS total_nucleos
             FROM projetos p
+            JOIN institutos i ON i.id = p.instituto_id
             LEFT JOIN nucleos n ON n.projeto_id = p.id AND n.status = 'ativo'
             $where
             GROUP BY p.id
-            ORDER BY p.nome ASC
+            ORDER BY i.nome ASC, p.nome ASC
             LIMIT " . self::PER_PAGE . " OFFSET $off
         ");
         $stmt->execute($params);
         $projetos = $stmt->fetchAll();
 
+        $institutosPermitidosIds = $permitidos;
+        $institutos = [];
+        if ($institutosPermitidosIds) {
+            [$w, $p2] = Escopo::whereIn($institutosPermitidosIds, 'id');
+            $institutos = $db->prepare("SELECT id, nome FROM institutos WHERE $w ORDER BY nome");
+            $institutos->execute($p2);
+            $institutos = $institutos->fetchAll();
+        }
+
         $totalPages = (int) ceil($total / self::PER_PAGE);
 
-        $data = compact('projetos', 'q', 'page', 'total', 'totalPages');
+        $data = compact('projetos', 'q', 'institutoId', 'institutos', 'page', 'total', 'totalPages');
         require_once ROOT_PATH . '/app/views/admin/projetos/index.php';
     }
 
     public function formNovo(): void
     {
-        Auth::requireRole('super_admin');
-        $projeto   = null;
-        $errors    = $_SESSION['form_errors'] ?? [];
-        $oldData   = $_SESSION['form_data']   ?? [];
+        Auth::requireAdminArea();
+        Permissao::requer('projetos.editar');
+        $db = Database::getInstance();
+
+        $projeto    = null;
+        $institutos = $this->institutosDisponiveis($db);
+        $errors     = $_SESSION['form_errors'] ?? [];
+        $oldData    = $_SESSION['form_data']   ?? [];
         unset($_SESSION['form_errors'], $_SESSION['form_data']);
 
         require_once ROOT_PATH . '/app/views/admin/projetos/form.php';
@@ -57,15 +74,22 @@ class AdminProjetosController
 
     public function store(): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('projetos.editar');
         Security::verifyCsrf();
 
-        $nome      = Security::sanitize($_POST['nome']      ?? '');
-        $descricao = Security::sanitize($_POST['descricao'] ?? '');
-        $errors    = [];
+        $nome        = Security::sanitize($_POST['nome']      ?? '');
+        $descricao   = Security::sanitize($_POST['descricao'] ?? '');
+        $institutoId = (int) ($_POST['instituto_id'] ?? 0);
+        $errors      = [];
 
         if ($nome === '') $errors['nome'] = 'Nome é obrigatório.';
         if (strlen($nome) > 150) $errors['nome'] = 'Nome muito longo (máx. 150 caracteres).';
+        if (!$institutoId) {
+            $errors['instituto_id'] = 'Selecione o instituto.';
+        } elseif (!Escopo::podeAcessarInstituto(Auth::id(), $institutoId)) {
+            $errors['instituto_id'] = 'Você não tem acesso a esse instituto.';
+        }
 
         if (!empty($errors)) {
             $_SESSION['form_errors'] = $errors;
@@ -89,10 +113,10 @@ class AdminProjetosController
 
         $db   = Database::getInstance();
         $stmt = $db->prepare(
-            "INSERT INTO projetos (nome, descricao, logo, status, criado_em)
-             VALUES (?, ?, ?, 'ativo', NOW())"
+            "INSERT INTO projetos (instituto_id, nome, descricao, logo, status, criado_em)
+             VALUES (?, ?, ?, ?, 'ativo', NOW())"
         );
-        $stmt->execute([$nome, $descricao ?: null, $logo]);
+        $stmt->execute([$institutoId, $nome, $descricao ?: null, $logo]);
         $id = $db->lastInsertId();
 
         Security::auditLog('cadastro', 'projetos', $id);
@@ -103,10 +127,19 @@ class AdminProjetosController
 
     public function formEditar(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('projetos.editar');
+        $id = (int) $id;
+
+        if (!Escopo::podeAcessarProjeto(Auth::id(), $id)) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
+            exit;
+        }
+
         $db      = Database::getInstance();
         $stmt    = $db->prepare("SELECT * FROM projetos WHERE id = ? LIMIT 1");
-        $stmt->execute([(int) $id]);
+        $stmt->execute([$id]);
         $projeto = $stmt->fetch();
 
         if (!$projeto) {
@@ -115,8 +148,9 @@ class AdminProjetosController
             exit;
         }
 
-        $errors  = $_SESSION['form_errors'] ?? [];
-        $oldData = $_SESSION['form_data']   ?? [];
+        $institutos = $this->institutosDisponiveis($db);
+        $errors     = $_SESSION['form_errors'] ?? [];
+        $oldData    = $_SESSION['form_data']   ?? [];
         unset($_SESSION['form_errors'], $_SESSION['form_data']);
 
         require_once ROOT_PATH . '/app/views/admin/projetos/form.php';
@@ -124,12 +158,20 @@ class AdminProjetosController
 
     public function update(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('projetos.editar');
         Security::verifyCsrf();
+        $id = (int) $id;
+
+        if (!Escopo::podeAcessarProjeto(Auth::id(), $id)) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
+            exit;
+        }
 
         $db   = Database::getInstance();
         $stmt = $db->prepare("SELECT * FROM projetos WHERE id = ? LIMIT 1");
-        $stmt->execute([(int) $id]);
+        $stmt->execute([$id]);
         $projeto = $stmt->fetch();
 
         if (!$projeto) {
@@ -138,12 +180,18 @@ class AdminProjetosController
             exit;
         }
 
-        $nome      = Security::sanitize($_POST['nome']      ?? '');
-        $descricao = Security::sanitize($_POST['descricao'] ?? '');
-        $errors    = [];
+        $nome        = Security::sanitize($_POST['nome']      ?? '');
+        $descricao   = Security::sanitize($_POST['descricao'] ?? '');
+        $institutoId = (int) ($_POST['instituto_id'] ?? 0);
+        $errors      = [];
 
         if ($nome === '') $errors['nome'] = 'Nome é obrigatório.';
         if (strlen($nome) > 150) $errors['nome'] = 'Nome muito longo.';
+        if (!$institutoId) {
+            $errors['instituto_id'] = 'Selecione o instituto.';
+        } elseif (!Escopo::podeAcessarInstituto(Auth::id(), $institutoId)) {
+            $errors['instituto_id'] = 'Você não tem acesso a esse instituto.';
+        }
 
         if (!empty($errors)) {
             $_SESSION['form_errors'] = $errors;
@@ -167,10 +215,13 @@ class AdminProjetosController
             }
         }
 
+        // Se o instituto mudou, os núcleos dependentes seguem o projeto — a
+        // hierarquia é resolvida por join (nucleos.projeto_id → projetos.instituto_id),
+        // então não há coluna redundante para sincronizar aqui.
         $stmt = $db->prepare(
-            "UPDATE projetos SET nome = ?, descricao = ?, logo = ? WHERE id = ?"
+            "UPDATE projetos SET instituto_id = ?, nome = ?, descricao = ?, logo = ? WHERE id = ?"
         );
-        $stmt->execute([$nome, $descricao ?: null, $logo, (int) $id]);
+        $stmt->execute([$institutoId, $nome, $descricao ?: null, $logo, $id]);
 
         Security::auditLog('edicao', 'projetos', $id);
         $_SESSION['flash_success'] = "Projeto \"$nome\" atualizado.";
@@ -180,16 +231,34 @@ class AdminProjetosController
 
     public function inativar(string $id): void
     {
-        Auth::requireRole('super_admin');
+        Auth::requireAdminArea();
+        Permissao::requer('projetos.excluir');
         Security::verifyCsrf();
+        $id = (int) $id;
+
+        if (!Escopo::podeAcessarProjeto(Auth::id(), $id)) {
+            http_response_code(403);
+            require_once ROOT_PATH . '/app/views/errors/403.php';
+            exit;
+        }
 
         $db   = Database::getInstance();
         $stmt = $db->prepare("UPDATE projetos SET status = 'inativo' WHERE id = ?");
-        $stmt->execute([(int) $id]);
+        $stmt->execute([$id]);
 
         Security::auditLog('exclusao', 'projetos', $id);
         $_SESSION['flash_success'] = 'Projeto inativado com sucesso.';
         header('Location: ' . APP_URL . '/admin/projetos');
         exit;
+    }
+
+    private function institutosDisponiveis(PDO $db): array
+    {
+        $ids = Escopo::institutosPermitidos(Auth::id());
+        if (!$ids) return [];
+        [$where, $params] = Escopo::whereIn($ids, 'id');
+        $stmt = $db->prepare("SELECT id, nome FROM institutos WHERE status = 'ativo' AND $where ORDER BY nome");
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 }

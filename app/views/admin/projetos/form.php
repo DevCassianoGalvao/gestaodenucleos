@@ -33,6 +33,19 @@ ob_start();
       <?= Security::csrfField() ?>
 
       <div class="form-group">
+        <label class="form-label" for="instituto_id">Instituto <span style="color:var(--vermelho)">*</span></label>
+        <select id="instituto_id" name="instituto_id" class="form-control <?= isset($errors['instituto_id']) ? 'is-invalid' : '' ?>" required>
+          <option value="">Selecione…</option>
+          <?php foreach (($institutos ?? []) as $inst): ?>
+            <option value="<?= $inst['id'] ?>" <?= (int) ($oldData['instituto_id'] ?? $projeto['instituto_id'] ?? 0) === (int) $inst['id'] ? 'selected' : '' ?>>
+              <?= Security::esc($inst['nome']) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <?php if (isset($errors['instituto_id'])): ?><div class="form-error"><?= Security::esc($errors['instituto_id']) ?></div><?php endif; ?>
+      </div>
+
+      <div class="form-group">
         <label class="form-label" for="nome">Nome do projeto <span style="color:var(--vermelho)">*</span></label>
         <input type="text" id="nome" name="nome" class="form-control <?= isset($errors['nome']) ? 'is-invalid' : '' ?>"
                value="<?= $val('nome') ?>" maxlength="150" required>

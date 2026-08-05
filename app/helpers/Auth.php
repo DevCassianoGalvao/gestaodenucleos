@@ -132,11 +132,17 @@ class Auth
     public static function dashboardUrl(): string
     {
         return match (self::perfil()) {
-            'super_admin' => APP_URL . '/admin/dashboard',
-            'professor'   => APP_URL . '/professor/dashboard',
-            'aluno'       => APP_URL . '/aluno/dashboard',
-            default       => APP_URL . '/login',
+            'super_admin', 'gestor' => APP_URL . '/admin/dashboard',
+            'professor'             => APP_URL . '/professor/dashboard',
+            'aluno'                 => APP_URL . '/aluno/dashboard',
+            default                 => APP_URL . '/login',
         };
+    }
+
+    /** Atalho: super_admin ou gestor — quem acessa a área administrativa. */
+    public static function requireAdminArea(): void
+    {
+        self::requireRole(['super_admin', 'gestor']);
     }
 
     private static function flashAndRedirect(string $key, string $msg, string $path): never

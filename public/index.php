@@ -8,6 +8,8 @@ require_once ROOT_PATH . '/config/config.php';
 require_once ROOT_PATH . '/app/models/Database.php';
 require_once ROOT_PATH . '/app/helpers/Auth.php';
 require_once ROOT_PATH . '/app/helpers/Security.php';
+require_once ROOT_PATH . '/app/helpers/Permissao.php';
+require_once ROOT_PATH . '/app/helpers/Escopo.php';
 
 Auth::startSession();
 
@@ -94,6 +96,11 @@ $routes = [
         '/api/dashboard/destaques'              => ['DashboardController',       'destaques'],
         '/api/dashboard/ranking'                => ['DashboardController',       'ranking'],
 
+        // Admin — institutos
+        '/admin/institutos'                     => ['AdminInstitutosController', 'index'],
+        '/admin/institutos/novo'                => ['AdminInstitutosController', 'formNovo'],
+        '/admin/institutos/{id}/editar'         => ['AdminInstitutosController', 'formEditar'],
+
         // Admin — projetos
         '/admin/projetos'                       => ['AdminProjetosController',   'index'],
         '/admin/projetos/novo'                  => ['AdminProjetosController',   'formNovo'],
@@ -154,6 +161,11 @@ $routes = [
         // Convites públicos
         '/convite/professor/{token}'            => ['ConviteController',         'processProfessor'],
         '/convite/aluno/{token}'                => ['ConviteController',         'processAluno'],
+
+        // Admin — institutos
+        '/admin/institutos/novo'                => ['AdminInstitutosController', 'store'],
+        '/admin/institutos/{id}/editar'         => ['AdminInstitutosController', 'update'],
+        '/admin/institutos/{id}/inativar'       => ['AdminInstitutosController', 'inativar'],
 
         // Admin — projetos
         '/admin/projetos/novo'                  => ['AdminProjetosController',   'store'],
